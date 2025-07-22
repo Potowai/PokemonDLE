@@ -1,3 +1,6 @@
+## 🤝 Contributing
+
+Contributions are welcome! If you have ideas, bug fixes, or new features, feel free to open an issue or submit a pull request. Please follow the code style and keep your changes focused.
 ## 🎮 How to Play
 
 1. Start typing to search for a Pokémon.
