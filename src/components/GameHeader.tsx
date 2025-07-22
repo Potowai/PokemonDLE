@@ -28,16 +28,9 @@ interface GameHeaderProps {
 }
 
 export function GameHeader({ attemptsLeft, gameStatus, onInfoClick, language, onLanguageChange, t, restartGame }: GameHeaderProps) {
-  const getStatusIcon = () => {
-    switch (gameStatus) {
-      case 'won':
-        return <Trophy className="w-6 h-6 text-yellow-400" />;
-      case 'lost':
-        return <Clock className="w-6 h-6 text-red-400" />;
-      default:
-        return <Zap className="w-6 h-6 text-blue-400" />;
-    }
-  };
+
+  // Always show Zap icon, animate only during 'playing'
+  const statusIcon = <Zap className="w-6 h-6 text-blue-400" />;
 
   return (
     <motion.div
@@ -50,7 +43,7 @@ export function GameHeader({ attemptsLeft, gameStatus, onInfoClick, language, on
           animate={{ rotate: gameStatus === 'playing' ? [0, 10, -10, 0] : 0 }}
           transition={{ duration: 2, repeat: gameStatus === 'playing' ? Infinity : 0 }}
         >
-          {getStatusIcon()}
+          {statusIcon}
         </motion.div>
         <h1
           className="text-2xl sm:text-4xl font-bold text-white flex flex-wrap items-center gap-2 max-w-full overflow-x-auto"
