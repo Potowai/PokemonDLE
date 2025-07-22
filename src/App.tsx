@@ -1,6 +1,3 @@
-// --- Demo: Big visible changes for commit history ---
-// Added credits modal, new state, helper, button, and more for demonstration.
-
 import { useState } from 'react';
 // Helper function for demo
 function getAppYear() {
@@ -230,10 +227,6 @@ function App() {
               </div>
             </div>
           )}
-// Demo: Add a fun CSS animation class
-// Add this to your global CSS for the fade-in effect:
-// .animate-fade-in { animation: fadeIn 0.4s ease; }
-// @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
 
           {isLoading && !mysteryPokemon && (
             <div className="text-center text-white/60">

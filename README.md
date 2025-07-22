@@ -75,4 +75,5 @@ npm run preview
 
 ## 📄 License
 
-MIT. See [LICENSE](LICENSE) for details.
+MIT License. See [LICENSE](LICENSE) for details. All rights reserved.
+End of License.
