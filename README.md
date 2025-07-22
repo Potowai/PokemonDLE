@@ -1,3 +1,8 @@
+## 🖼️ Screenshots
+
+_Add your screenshots here!_
+
+![Screenshot Placeholder](https://via.placeholder.com/600x300?text=PokemonDLE+Screenshot)
 ## 🤝 Contributing
 
 Contributions are welcome! If you have ideas, bug fixes, or new features, feel free to open an issue or submit a pull request. Please follow the code style and keep your changes focused.
