@@ -1,5 +1,4 @@
 import { motion } from 'framer-motion';
-import React from 'react';
 import { GameHeader } from './components/GameHeader';
 import { PokemonSearch } from './components/PokemonSearch';
 import { ComparisonTable } from './components/ComparisonTable';
