@@ -1,3 +1,6 @@
+## 🧑‍💻 About
+
+PokemonDLE is a playful guessing game for Pokémon fans, inspired by Wordle. Built for speed, fun, and accessibility—challenge yourself and your friends!
 <h1 align="center">⚡️ PokemonDLE</h1>
 
 PokemonDLE is a fast, modern, and fun Pokémon guessing game inspired by Wordle, built with React, TypeScript, and Tailwind CSS. Test your Pokémon knowledge by searching, comparing, and guessing Pokémon each day!
