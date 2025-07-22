@@ -13,9 +13,16 @@ export function useGame() {
   const [isLoading, setIsLoading] = useState(false);
 
   const selectMysteryPokemon = useCallback(async () => {
-    const randomIndex = Math.floor(Math.random() * pokemonIndex.length);
-    const selectedPokemon = pokemonIndex[randomIndex];
-    
+    // Check for dev override
+    const forceId = import.meta.env.VITE_FORCE_POKEMON;
+    let selectedPokemon;
+    if (forceId) {
+      selectedPokemon = pokemonIndex.find(p => String(p.id) === String(forceId));
+    }
+    if (!selectedPokemon) {
+      const randomIndex = Math.floor(Math.random() * pokemonIndex.length);
+      selectedPokemon = pokemonIndex[randomIndex];
+    }
     try {
       setIsLoading(true);
       const details = await fetchPokemonDetails(selectedPokemon.name);

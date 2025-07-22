@@ -1,10 +1,24 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { Confetti } from './components/Confetti';
 // Helper function for demo
 function getAppYear() {
   return new Date().getFullYear();
 }
+import { motion } from 'framer-motion';
+import { GameHeader } from './components/GameHeader';
+import PokemonSearch from './components/PokemonSearch';
+import { ComparisonTable } from './components/ComparisonTable';
+import { GameResult } from './components/GameResult';
+import { MouseFollowPokemon } from './components/MouseFollowPokemon';
+import { useGame } from './hooks/useGame';
+import type { PokemonIndexEntry } from './data/pokemonIndex';
+
+
+function App() {
   // New state for showing credits modal
   const [showCredits, setShowCredits] = useState(false);
+  // Language state
+  const [language, setLanguage] = useState<'en' | 'fr'>('en');
   // Demo: log when credits modal is toggled
   function handleToggleCredits() {
     setShowCredits(v => {
@@ -13,16 +27,6 @@ function getAppYear() {
       return next;
     });
   }
-import { motion } from 'framer-motion';
-import { GameHeader } from './components/GameHeader';
-import { PokemonSearch } from './components/PokemonSearch';
-import { ComparisonTable } from './components/ComparisonTable';
-import { GameResult } from './components/GameResult';
-import { MouseFollowPokemon } from './components/MouseFollowPokemon';
-import { useGame } from './hooks/useGame';
-import type { PokemonIndexEntry } from './data/pokemonIndex';
-
-function App() {
   const { 
     mysteryPokemon, 
     guesses, 
@@ -32,6 +36,16 @@ function App() {
     makeGuess, 
     restartGame 
   } = useGame();
+
+  // Ref for results section
+  const resultsRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to results and show confetti when user wins
+  useEffect(() => {
+    if (gameStatus === 'won' && resultsRef.current) {
+      resultsRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [gameStatus]);
 
   const handlePokemonSelect = (pokemon: PokemonIndexEntry) => {
     if (gameStatus === 'playing' && !isLoading) {
@@ -202,28 +216,31 @@ function App() {
           transition={{ duration: 0.8 }}
           className="max-w-6xl mx-auto"
         >
-          <GameHeader attemptsLeft={attemptsLeft} gameStatus={gameStatus} />
+          <GameHeader 
+            attemptsLeft={attemptsLeft} 
+            gameStatus={gameStatus} 
+            onInfoClick={handleToggleCredits}
+            language={language}
+            onLanguageChange={(lang: string) => setLanguage(lang as 'en' | 'fr')}
+          />
 
-          {/* Demo: Add a button to show credits */}
-          <div className="flex justify-end mb-4">
-            <button
-              className="px-4 py-2 rounded bg-indigo-700 text-white hover:bg-indigo-800 transition font-bold shadow-lg"
-              onClick={handleToggleCredits}
-            >
-              {showCredits ? 'Hide Credits' : 'Show Credits'}
-            </button>
-          </div>
-          {/* Demo: Credits Modal */}
+          {/* Info button is now in the header. */}
           {showCredits && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-              <div className="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full text-center relative animate-fade-in">
-                <h2 className="text-2xl font-bold mb-2">Credits</h2>
-                <p className="mb-4">PokemonDLE by Potowai, {getAppYear()}<br/>MIT License</p>
-                <button
-                  className="absolute top-2 right-2 text-gray-500 hover:text-black text-xl"
-                  onClick={handleToggleCredits}
-                  aria-label="Close credits"
-                >×</button>
+              <div className="max-w-md w-full animate-fade-in">
+                <div className="relative">
+                  <button
+                    className="absolute top-2 right-2 text-gray-300 hover:text-white text-xl z-10"
+                    onClick={handleToggleCredits}
+                    aria-label="Close credits"
+                  >×</button>
+                </div>
+                <div className="mt-2">
+                  <div className="rounded-lg border border-white/20 bg-white/10 backdrop-blur-md text-white shadow-lg p-8 text-center">
+                    <h2 className="text-2xl font-bold mb-2">Credits</h2>
+                    <p className="mb-4">PokemonDLE by Potowai, {getAppYear()}<br/>MIT License</p>
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -231,12 +248,12 @@ function App() {
           {isLoading && !mysteryPokemon && (
             <div className="text-center text-white/60">
               <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                className="w-8 h-8 border-2 border-white/20 border-t-white/60 rounded-full mx-auto mb-4"
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          className="w-8 h-8 border-2 border-white/20 border-t-white/60 rounded-full mx-auto mb-4"
               />
               <span className="text-white/60">
-                Loading mystery Pokémon...
+          Loading mystery Pokémon...
               </span>
             </div>
           )}
@@ -244,32 +261,38 @@ function App() {
           {mysteryPokemon && (
             <>
               <div className="mb-8">
-                <PokemonSearch 
-                  onPokemonSelect={handlePokemonSelect}
-                  disabled={gameStatus !== 'playing' || isLoading}
-                  placeholder={
-                    gameStatus !== 'playing' ? 
-                    "Game Over" : 
-                    isLoading ? 
-                    "Loading..." : 
-                    "Search for a Pokémon..."
-                  }
-                  guessed={guesses.map(g => g.pokemon.id)}
-                />
+          <PokemonSearch 
+            onPokemonSelect={handlePokemonSelect}
+            disabled={gameStatus !== 'playing' || isLoading}
+            placeholder={
+              gameStatus !== 'playing' ? 
+              (language === 'fr' ? "Partie terminée" : "Game Over") : 
+              isLoading ? 
+              (language === 'fr' ? "Chargement..." : "Loading...") : 
+              (language === 'fr' ? "Rechercher un Pokémon..." : "Search for a Pokémon...")
+            }
+            guessed={guesses.map(g => g.pokemon.id)}
+            language={language}
+          />
               </div>
 
-              <motion.div
-                layout
-                className="backdrop-blur-lg border rounded-2xl p-6 mb-8 shadow-2xl bg-white/5 border-white/20"
-              >
-                <ComparisonTable guesses={guesses} />
-              </motion.div>
+
+              {/* Confetti and scroll target for results */}
+              <div ref={resultsRef} className="relative">
+          <Confetti trigger={gameStatus === 'won'} />
+          <motion.div
+            layout
+            className="backdrop-blur-lg border rounded-2xl p-6 mb-8 shadow-2xl bg-white/5 border-white/20"
+          >
+            <ComparisonTable guesses={guesses} />
+          </motion.div>
+              </div>
 
               <GameResult 
-                gameStatus={gameStatus}
-                mysteryPokemon={mysteryPokemon}
-                attemptsUsed={8 - attemptsLeft}
-                onRestart={restartGame}
+          gameStatus={gameStatus}
+          mysteryPokemon={mysteryPokemon}
+          attemptsUsed={8 - attemptsLeft}
+          onRestart={restartGame}
               />
             </>
           )}
@@ -281,8 +304,9 @@ function App() {
       <div className="fixed bottom-20 right-20 w-32 h-32 bg-purple-500/3 rounded-full blur-2xl"></div>
       <div className="fixed top-1/2 right-10 w-16 h-16 bg-pink-500/3 rounded-full blur-2xl"></div>
       
-      {/* Mouse following Pokemon */}
-      <MouseFollowPokemon />
+      {/* Mouse following Pokemon (desktop only) */}
+      {/* Hide on mobile using a media query check */}
+      {typeof window === 'undefined' || window.matchMedia('(pointer: fine)').matches ? <MouseFollowPokemon /> : null}
     </div>
   );
 }

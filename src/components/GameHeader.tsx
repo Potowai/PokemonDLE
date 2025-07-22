@@ -1,14 +1,18 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Zap, Trophy, Clock } from 'lucide-react';
+import { InfoIcon } from './icons/Info';
 import type { GameStatus } from '../types/pokemon';
 
 interface GameHeaderProps {
   attemptsLeft: number;
   gameStatus: GameStatus;
+  onInfoClick?: () => void;
+  language: string;
+  onLanguageChange: (lang: string) => void;
 }
 
-export function GameHeader({ attemptsLeft, gameStatus }: GameHeaderProps) {
+export function GameHeader({ attemptsLeft, gameStatus, onInfoClick, language, onLanguageChange }: GameHeaderProps) {
   const getStatusIcon = () => {
     switch (gameStatus) {
       case 'won':
@@ -20,27 +24,7 @@ export function GameHeader({ attemptsLeft, gameStatus }: GameHeaderProps) {
     }
   };
 
-  const getStatusText = () => {
-    switch (gameStatus) {
-      case 'won':
-        return 'Congratulations! 🎉';
-      case 'lost':
-        return 'Game Over! 😔';
-      default:
-        return 'PokéTraits';
-    }
-  };
-
-  const getStatusColor = () => {
-    switch (gameStatus) {
-      case 'won':
-        return 'text-yellow-400';
-      case 'lost':
-        return 'text-red-400';
-      default:
-        return 'text-white';
-    }
-  };
+  // Removed unused getStatusText and getStatusColor
 
   return (
     <motion.div
@@ -48,15 +32,45 @@ export function GameHeader({ attemptsLeft, gameStatus }: GameHeaderProps) {
       animate={{ opacity: 1, y: 0 }}
       className="text-center mb-8"
     >
-      <div className="flex items-center justify-center gap-3 mb-4">
+      <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-4 max-w-full px-2">
         <motion.div
           animate={{ rotate: gameStatus === 'playing' ? [0, 10, -10, 0] : 0 }}
           transition={{ duration: 2, repeat: gameStatus === 'playing' ? Infinity : 0 }}
         >
           {getStatusIcon()}
         </motion.div>
-        <h1 className={`text-4xl font-bold text-white`}>
-          PokemonDLE
+        <h1
+          className="text-2xl sm:text-4xl font-bold text-white flex flex-wrap items-center gap-2 max-w-full overflow-x-auto"
+          style={{ wordBreak: 'break-word' }}
+        >
+          <span
+            className="cursor-pointer hover:underline truncate max-w-[60vw] sm:max-w-none"
+            onClick={() => window.location.reload()}
+            tabIndex={0}
+            role="button"
+            aria-label="Reload page"
+          >
+            PokemonDLE
+          </span>
+          <button
+            type="button"
+            aria-label="Show info / credits"
+            onClick={typeof onInfoClick === 'function' ? onInfoClick : undefined}
+            className="ml-1 sm:ml-2 text-white/70 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-400 rounded-full p-1 flex items-center justify-center"
+            style={{ width: 28, height: 28 }}
+          >
+            <InfoIcon width={22} height={22} />
+          </button>
+          <select
+            value={language}
+            onChange={e => onLanguageChange(e.target.value)}
+            className="ml-1 sm:ml-3 px-2 py-1 rounded bg-white text-gray-900 text-sm sm:text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            aria-label="Select language"
+            style={{ minWidth: 80 }}
+          >
+            <option value="en">English</option>
+            <option value="fr">Français</option>
+          </select>
         </h1>
       </div>
       
