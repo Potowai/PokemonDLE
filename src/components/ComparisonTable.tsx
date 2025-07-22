@@ -93,6 +93,7 @@ const TypeTag = ({ type }: { type: string }) => {
 
 interface ComparisonTableProps {
   guesses: GuessResult[];
+  language: 'en' | 'fr';
 }
 
 const ComparisonIcon = ({ status }: { status: string }) => {
@@ -134,11 +135,37 @@ const getStatusColor = (status: string) => {
   }
 };
 
-export function ComparisonTable({ guesses }: ComparisonTableProps) {
+function ComparisonTable({ guesses, language }: ComparisonTableProps) {
+  const t = {
+    en: {
+      empty: 'Make your first guess to see the comparison table!',
+      pokemon: 'Pokémon',
+      gen: 'Gen',
+      type1: 'Type 1',
+      type2: 'Type 2',
+      color: 'Color',
+      habitat: 'Habitat',
+      evolution: 'Evolution',
+      height: 'Height',
+      weight: 'Weight',
+    },
+    fr: {
+      empty: 'Faites votre première proposition pour voir le tableau de comparaison !',
+      pokemon: 'Pokémon',
+      gen: 'Gén',
+      type1: 'Type 1',
+      type2: 'Type 2',
+      color: 'Couleur',
+      habitat: 'Habitat',
+      evolution: 'Évolution',
+      height: 'Taille',
+      weight: 'Poids',
+    }
+  };
   if (guesses.length === 0) {
     return (
       <div className="text-center text-white/60 dark:text-white/60 py-8">
-        <p>Make your first guess to see the comparison table!</p>
+        <p>{t[language].empty}</p>
       </div>
     );
   }
@@ -150,15 +177,15 @@ export function ComparisonTable({ guesses }: ComparisonTableProps) {
         <div className="min-w-full">
           {/* Headers */}
           <div className="grid grid-cols-9 gap-2 mb-4 text-xs font-medium text-white/80 uppercase tracking-wider">
-            <div className="text-center">Pokémon</div>
-            <div className="text-center">Gen</div>
-            <div className="text-center">Type 1</div>
-            <div className="text-center">Type 2</div>
-            <div className="text-center">Color</div>
-            <div className="text-center">Habitat</div>
-            <div className="text-center">Evolution</div>
-            <div className="text-center">Height</div>
-            <div className="text-center">Weight</div>
+            <div className="text-center">{t[language].pokemon}</div>
+            <div className="text-center">{t[language].gen}</div>
+            <div className="text-center">{t[language].type1}</div>
+            <div className="text-center">{t[language].type2}</div>
+            <div className="text-center">{t[language].color}</div>
+            <div className="text-center">{t[language].habitat}</div>
+            <div className="text-center">{t[language].evolution}</div>
+            <div className="text-center">{t[language].height}</div>
+            <div className="text-center">{t[language].weight}</div>
           </div>
 
           {/* Guesses */}
@@ -378,3 +405,5 @@ export function ComparisonTable({ guesses }: ComparisonTableProps) {
     </>
   );
 }
+
+export default ComparisonTable;

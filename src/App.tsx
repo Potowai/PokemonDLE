@@ -1,3 +1,56 @@
+// Translation object
+const t = {
+  en: {
+    guessPrompt: 'Guess the mystery Pokémon from Gen 1-5!',
+    attemptsLeft: (n: number) => `${n} attempts left`,
+    loading: 'Loading mystery Pokémon...',
+    credits: 'Credits',
+    creditsText: (year: number) => `PokemonDLE by Potowai, ${year}\nMIT License`,
+    gameOver: 'Game Over',
+    finished: 'Game Over',
+    searchPlaceholder: 'Search for a Pokémon...',
+    searchPlaceholderLoading: 'Loading...',
+    searchPlaceholderOver: 'Game Over',
+    playAgain: 'Play Again',
+    share: 'Share',
+    mysteryWas: 'The mystery Pokémon was:',
+    generation: 'Generation',
+    type: 'Type',
+    color: 'Color',
+    evolution: 'Evolution',
+    stage1: '1st Stage',
+    stage2: '2nd Stage',
+    stage3: '3rd Stage',
+    habitat: 'Habitat',
+    unknown: 'Unknown',
+    heightWeight: 'Height / Weight',
+  },
+  fr: {
+    guessPrompt: 'Devinez le Pokémon mystère de la Gén 1-5 !',
+    attemptsLeft: (n: number) => `${n} essais restants`,
+    loading: 'Chargement du Pokémon mystère...',
+    credits: 'Crédits',
+    creditsText: (year: number) => `PokemonDLE par Potowai, ${year}\nLicence MIT`,
+    gameOver: 'Partie terminée',
+    finished: 'Partie terminée',
+    searchPlaceholder: 'Rechercher un Pokémon...',
+    searchPlaceholderLoading: 'Chargement...',
+    searchPlaceholderOver: 'Partie terminée',
+    playAgain: 'Rejouer',
+    share: 'Partager',
+    mysteryWas: 'Le Pokémon mystère était :',
+    generation: 'Génération',
+    type: 'Type',
+    color: 'Couleur',
+    evolution: 'Évolution',
+    stage1: '1ère étape',
+    stage2: '2ème étape',
+    stage3: '3ème étape',
+    habitat: 'Habitat',
+    unknown: 'Inconnu',
+    heightWeight: 'Taille / Poids',
+  }
+};
 import { useState, useRef, useEffect } from 'react';
 import { Confetti } from './components/Confetti';
 // Helper function for demo
@@ -7,7 +60,7 @@ function getAppYear() {
 import { motion } from 'framer-motion';
 import { GameHeader } from './components/GameHeader';
 import PokemonSearch from './components/PokemonSearch';
-import { ComparisonTable } from './components/ComparisonTable';
+import ComparisonTable from './components/ComparisonTable';
 import { GameResult } from './components/GameResult';
 import { MouseFollowPokemon } from './components/MouseFollowPokemon';
 import { useGame } from './hooks/useGame';
@@ -222,6 +275,7 @@ function App() {
             onInfoClick={handleToggleCredits}
             language={language}
             onLanguageChange={(lang: string) => setLanguage(lang as 'en' | 'fr')}
+            t={t[language]}
           />
 
           {/* Info button is now in the header. */}
@@ -237,8 +291,8 @@ function App() {
                 </div>
                 <div className="mt-2">
                   <div className="rounded-lg border border-white/20 bg-white/10 backdrop-blur-md text-white shadow-lg p-8 text-center">
-                    <h2 className="text-2xl font-bold mb-2">Credits</h2>
-                    <p className="mb-4">PokemonDLE by Potowai, {getAppYear()}<br/>MIT License</p>
+                    <h2 className="text-2xl font-bold mb-2">{t[language].credits}</h2>
+                    <p className="mb-4" style={{ whiteSpace: 'pre-line' }}>{t[language].creditsText(getAppYear())}</p>
                   </div>
                 </div>
               </div>
@@ -248,12 +302,12 @@ function App() {
           {isLoading && !mysteryPokemon && (
             <div className="text-center text-white/60">
               <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="w-8 h-8 border-2 border-white/20 border-t-white/60 rounded-full mx-auto mb-4"
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                className="w-8 h-8 border-2 border-white/20 border-t-white/60 rounded-full mx-auto mb-4"
               />
               <span className="text-white/60">
-          Loading mystery Pokémon...
+                {t[language].loading}
               </span>
             </div>
           )}
@@ -261,38 +315,36 @@ function App() {
           {mysteryPokemon && (
             <>
               <div className="mb-8">
-          <PokemonSearch 
-            onPokemonSelect={handlePokemonSelect}
-            disabled={gameStatus !== 'playing' || isLoading}
-            placeholder={
-              gameStatus !== 'playing' ? 
-              (language === 'fr' ? "Partie terminée" : "Game Over") : 
-              isLoading ? 
-              (language === 'fr' ? "Chargement..." : "Loading...") : 
-              (language === 'fr' ? "Rechercher un Pokémon..." : "Search for a Pokémon...")
-            }
-            guessed={guesses.map(g => g.pokemon.id)}
-            language={language}
-          />
+                <PokemonSearch 
+                  onPokemonSelect={handlePokemonSelect}
+                  disabled={gameStatus !== 'playing' || isLoading}
+                  placeholder={
+                    gameStatus !== 'playing' ? t[language].searchPlaceholderOver :
+                    isLoading ? t[language].searchPlaceholderLoading :
+                    t[language].searchPlaceholder
+                  }
+                  guessed={guesses.map(g => g.pokemon.id)}
+                  language={language}
+                />
               </div>
-
 
               {/* Confetti and scroll target for results */}
               <div ref={resultsRef} className="relative">
-          <Confetti trigger={gameStatus === 'won'} />
-          <motion.div
-            layout
-            className="backdrop-blur-lg border rounded-2xl p-6 mb-8 shadow-2xl bg-white/5 border-white/20"
-          >
-            <ComparisonTable guesses={guesses} />
-          </motion.div>
+                <Confetti trigger={gameStatus === 'won'} />
+                <motion.div
+                  layout
+                  className="backdrop-blur-lg border rounded-2xl p-6 mb-8 shadow-2xl bg-white/5 border-white/20"
+                >
+                  <ComparisonTable guesses={guesses} language={language} />
+                </motion.div>
               </div>
 
               <GameResult 
-          gameStatus={gameStatus}
-          mysteryPokemon={mysteryPokemon}
-          attemptsUsed={8 - attemptsLeft}
-          onRestart={restartGame}
+                gameStatus={gameStatus}
+                mysteryPokemon={mysteryPokemon}
+                attemptsUsed={8 - attemptsLeft}
+                onRestart={restartGame}
+                t={t[language]}
               />
             </>
           )}

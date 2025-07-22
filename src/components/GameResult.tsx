@@ -9,9 +9,24 @@ interface GameResultProps {
   mysteryPokemon: PokemonDetails | null;
   attemptsUsed: number;
   onRestart: () => void;
+  t: {
+    playAgain: string;
+    share: string;
+    mysteryWas: string;
+    generation: string;
+    type: string;
+    color: string;
+    evolution: string;
+    stage1: string;
+    stage2: string;
+    stage3: string;
+    habitat: string;
+    unknown: string;
+    heightWeight: string;
+  };
 }
 
-export function GameResult({ gameStatus, mysteryPokemon, attemptsUsed, onRestart }: GameResultProps) {
+export function GameResult({ gameStatus, mysteryPokemon, attemptsUsed, onRestart, t }: GameResultProps) {
   if (gameStatus === 'playing' || !mysteryPokemon) {
     return null;
   }
@@ -59,7 +74,7 @@ export function GameResult({ gameStatus, mysteryPokemon, attemptsUsed, onRestart
         </motion.div>
         
         <h2 className="text-2xl font-bold text-white mb-2">
-          The mystery Pokémon was:
+          {t.mysteryWas || 'The mystery Pokémon was:'}
         </h2>
         <h3 className="text-3xl font-bold text-blue-400 capitalize mb-4">
           {mysteryPokemon.name}
@@ -67,36 +82,36 @@ export function GameResult({ gameStatus, mysteryPokemon, attemptsUsed, onRestart
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-md mx-auto mb-6 text-sm">
           <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-lg p-3">
-            <div className="text-white/60">Generation</div>
+            <div className="text-white/60">{t.generation || 'Generation'}</div>
             <div className="text-white font-semibold">{mysteryPokemon.generation}</div>
           </div>
           <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-lg p-3">
-            <div className="text-white/60">Type</div>
+            <div className="text-white/60">{t.type || 'Type'}</div>
             <div className="text-white font-semibold capitalize">
               {mysteryPokemon.types.join(' / ')}
             </div>
           </div>
           <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-lg p-3">
-            <div className="text-white/60">Color</div>
+            <div className="text-white/60">{t.color || 'Color'}</div>
             <div className="text-white font-semibold capitalize">{mysteryPokemon.color}</div>
           </div>
           <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-lg p-3">
-            <div className="text-white/60">Evolution</div>
+            <div className="text-white/60">{t.evolution || 'Evolution'}</div>
             <div className="text-white font-semibold">
-              {mysteryPokemon.evolutionStage === 1 ? '1st Stage' : mysteryPokemon.evolutionStage === 2 ? '2nd Stage' : '3rd Stage'}
+              {mysteryPokemon.evolutionStage === 1 ? (t.stage1 || '1st Stage') : mysteryPokemon.evolutionStage === 2 ? (t.stage2 || '2nd Stage') : (t.stage3 || '3rd Stage')}
             </div>
           </div>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-md mx-auto mb-6 text-sm">
           <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-lg p-3">
-            <div className="text-white/60">Habitat</div>
+            <div className="text-white/60">{t.habitat || 'Habitat'}</div>
             <div className="text-white font-semibold capitalize">
-              {mysteryPokemon.habitat || 'Unknown'}
+              {mysteryPokemon.habitat || (t.unknown || 'Unknown')}
             </div>
           </div>
           <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-lg p-3">
-            <div className="text-white/60">Height / Weight</div>
+            <div className="text-white/60">{t.heightWeight || 'Height / Weight'}</div>
             <div className="text-white font-semibold">
               {(mysteryPokemon.height / 10).toFixed(1)}m / {(mysteryPokemon.weight / 10).toFixed(1)}kg
             </div>
@@ -106,11 +121,11 @@ export function GameResult({ gameStatus, mysteryPokemon, attemptsUsed, onRestart
         <div className="flex gap-4 justify-center">
           <Button onClick={onRestart} className="gap-2">
             <RotateCcw className="w-4 h-4" />
-            Play Again
+            {t.playAgain}
           </Button>
           <Button onClick={handleShare} variant="outline" className="gap-2">
             <Share2 className="w-4 h-4" />
-            Share
+            {t.share}
           </Button>
         </div>
       </div>

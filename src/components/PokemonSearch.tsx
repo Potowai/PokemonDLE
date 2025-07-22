@@ -184,7 +184,7 @@ function PokemonSearch({
         aria-owns={listboxId}
         aria-haspopup="listbox"
       >
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60 w-4 h-4 pointer-events-none" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/70 w-5 h-5 pointer-events-none z-10 drop-shadow" />
         <Input
           ref={inputRef}
           type="text"

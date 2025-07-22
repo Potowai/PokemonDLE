@@ -10,9 +10,23 @@ interface GameHeaderProps {
   onInfoClick?: () => void;
   language: string;
   onLanguageChange: (lang: string) => void;
+  t: {
+    guessPrompt: string;
+    attemptsLeft: (n: number) => string;
+    loading: string;
+    credits: string;
+    creditsText: (year: number) => string;
+    gameOver: string;
+    finished: string;
+    searchPlaceholder: string;
+    searchPlaceholderLoading: string;
+    searchPlaceholderOver: string;
+    playAgain: string;
+    share: string;
+  };
 }
 
-export function GameHeader({ attemptsLeft, gameStatus, onInfoClick, language, onLanguageChange }: GameHeaderProps) {
+export function GameHeader({ attemptsLeft, gameStatus, onInfoClick, language, onLanguageChange, t }: GameHeaderProps) {
   const getStatusIcon = () => {
     switch (gameStatus) {
       case 'won':
@@ -75,7 +89,7 @@ export function GameHeader({ attemptsLeft, gameStatus, onInfoClick, language, on
       </div>
       
       <p className="text-white/80 text-lg mb-2">
-        Guess the mystery Pokémon from Gen 1-5!
+        {t.guessPrompt}
       </p>
       
       {gameStatus === 'playing' && (
@@ -85,7 +99,7 @@ export function GameHeader({ attemptsLeft, gameStatus, onInfoClick, language, on
           transition={{ duration: 0.5, repeat: attemptsLeft <= 2 ? Infinity : 0 }}
         >
           <span className={`font-semibold ${attemptsLeft <= 2 ? 'text-red-400' : 'text-white'}`}>
-            {attemptsLeft} attempts left
+            {t.attemptsLeft(attemptsLeft)}
           </span>
         </motion.div>
       )}
