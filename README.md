@@ -1,4 +1,11 @@
-## 🖼️ Screenshots
+## �️ Roadmap
+
+- Daily challenge mode
+- Leaderboards
+- More Pokémon generations
+- Shareable results
+- Mobile UI improvements
+## �🖼️ Screenshots
 
 _Add your screenshots here!_
 
