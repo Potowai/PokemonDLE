@@ -1,3 +1,9 @@
+## 🎮 How to Play
+
+1. Start typing to search for a Pokémon.
+2. Select your guess from the suggestions.
+3. Compare your guess to the mystery Pokémon using the feedback table.
+4. Keep guessing until you find the correct Pokémon or run out of attempts!
 ## 🧑‍💻 About
 
 PokemonDLE is a playful guessing game for Pokémon fans, inspired by Wordle. Built for speed, fun, and accessibility—challenge yourself and your friends!
