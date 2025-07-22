@@ -1,3 +1,21 @@
+// --- Demo: Big visible changes for commit history ---
+// Added credits modal, new state, helper, button, and more for demonstration.
+
+import { useState } from 'react';
+// Helper function for demo
+function getAppYear() {
+  return new Date().getFullYear();
+}
+  // New state for showing credits modal
+  const [showCredits, setShowCredits] = useState(false);
+  // Demo: log when credits modal is toggled
+  function handleToggleCredits() {
+    setShowCredits(v => {
+      const next = !v;
+      console.log('Credits modal now', next ? 'open' : 'closed');
+      return next;
+    });
+  }
 import { motion } from 'framer-motion';
 import { GameHeader } from './components/GameHeader';
 import { PokemonSearch } from './components/PokemonSearch';
@@ -188,6 +206,34 @@ function App() {
           className="max-w-6xl mx-auto"
         >
           <GameHeader attemptsLeft={attemptsLeft} gameStatus={gameStatus} />
+
+          {/* Demo: Add a button to show credits */}
+          <div className="flex justify-end mb-4">
+            <button
+              className="px-4 py-2 rounded bg-indigo-700 text-white hover:bg-indigo-800 transition font-bold shadow-lg"
+              onClick={handleToggleCredits}
+            >
+              {showCredits ? 'Hide Credits' : 'Show Credits'}
+            </button>
+          </div>
+          {/* Demo: Credits Modal */}
+          {showCredits && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+              <div className="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full text-center relative animate-fade-in">
+                <h2 className="text-2xl font-bold mb-2">Credits</h2>
+                <p className="mb-4">PokemonDLE by Potowai, {getAppYear()}<br/>MIT License</p>
+                <button
+                  className="absolute top-2 right-2 text-gray-500 hover:text-black text-xl"
+                  onClick={handleToggleCredits}
+                  aria-label="Close credits"
+                >×</button>
+              </div>
+            </div>
+          )}
+// Demo: Add a fun CSS animation class
+// Add this to your global CSS for the fade-in effect:
+// .animate-fade-in { animation: fadeIn 0.4s ease; }
+// @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
 
           {isLoading && !mysteryPokemon && (
             <div className="text-center text-white/60">
