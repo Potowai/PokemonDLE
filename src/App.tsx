@@ -96,7 +96,29 @@ function App() {
   // Scroll to results and show confetti when user wins
   useEffect(() => {
     if (gameStatus === 'won' && resultsRef.current) {
-      resultsRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(() => {
+        const el = resultsRef.current;
+        if (!el) return;
+        if (window.innerWidth < 768) {
+          el.style.scrollMarginTop = '80px';
+          // Wait a bit longer to ensure all traits are rendered
+          setTimeout(() => {
+            if (!el) return;
+            if (typeof (el as any).scrollIntoViewIfNeeded === 'function') {
+              (el as any).scrollIntoViewIfNeeded(true);
+            } else {
+              el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            // Extra scroll after a short delay to ensure visibility if keyboard or overlays are present
+            setTimeout(() => {
+              const el2 = resultsRef.current;
+              if (el2) el2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 400);
+          }, 400);
+        } else {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 200);
     }
   }, [gameStatus]);
 
@@ -276,6 +298,7 @@ function App() {
             language={language}
             onLanguageChange={(lang: string) => setLanguage(lang as 'en' | 'fr')}
             t={t[language]}
+            restartGame={restartGame}
           />
 
           {/* Info button is now in the header. */}

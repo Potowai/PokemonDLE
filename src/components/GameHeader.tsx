@@ -24,9 +24,10 @@ interface GameHeaderProps {
     playAgain: string;
     share: string;
   };
+  restartGame?: () => void;
 }
 
-export function GameHeader({ attemptsLeft, gameStatus, onInfoClick, language, onLanguageChange, t }: GameHeaderProps) {
+export function GameHeader({ attemptsLeft, gameStatus, onInfoClick, language, onLanguageChange, t, restartGame }: GameHeaderProps) {
   const getStatusIcon = () => {
     switch (gameStatus) {
       case 'won':
@@ -37,8 +38,6 @@ export function GameHeader({ attemptsLeft, gameStatus, onInfoClick, language, on
         return <Zap className="w-6 h-6 text-blue-400" />;
     }
   };
-
-  // Removed unused getStatusText and getStatusColor
 
   return (
     <motion.div
@@ -59,10 +58,10 @@ export function GameHeader({ attemptsLeft, gameStatus, onInfoClick, language, on
         >
           <span
             className="cursor-pointer hover:underline truncate max-w-[60vw] sm:max-w-none"
-            onClick={() => window.location.reload()}
+            onClick={restartGame}
             tabIndex={0}
             role="button"
-            aria-label="Reload page"
+            aria-label="Restart game"
           >
             PokemonDLE
           </span>
