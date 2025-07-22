@@ -216,6 +216,7 @@ function App() {
                     "Loading..." : 
                     "Search for a Pokémon..."
                   }
+                  guessed={guesses.map(g => g.pokemon.id)}
                 />
               </div>
 

@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect, useRef } from 'react';
 
 const pokemonSprites = [
   { id: 25, name: "Pikachu" },
@@ -23,49 +22,90 @@ const getRandomSprite = () => {
 };
 
 export function MouseFollowPokemon() {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [randomSprite] = useState(() => getRandomSprite());
+  const imgRef = useRef<HTMLImageElement>(null);
+  const positionRef = useRef({ x: -9999, y: -9999 });
+  const targetRef = useRef({ x: 0, y: 0 });
+  const animationIdRef = useRef<number>();
+
+  // Configuration options
+  const CONFIG = {
+    smooth: true,
+    lerpFactor: 0.100, // Lower value for more lag/inertia
+    offsetX: 0,
+    offsetY: 0
+  };
+
+  const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
+      targetRef.current.x = e.clientX + CONFIG.offsetX;
+      targetRef.current.y = e.clientY + CONFIG.offsetY;
+
+      if (!CONFIG.smooth && imgRef.current) {
+        // Snap version: move directly
+        imgRef.current.style.left = targetRef.current.x + 'px';
+        imgRef.current.style.top = targetRef.current.y + 'px';
+      }
+    };
+
+    const tick = () => {
+      if (CONFIG.smooth && imgRef.current) {
+        positionRef.current.x = lerp(positionRef.current.x, targetRef.current.x, CONFIG.lerpFactor);
+        positionRef.current.y = lerp(positionRef.current.y, targetRef.current.y, CONFIG.lerpFactor);
+        
+        imgRef.current.style.left = positionRef.current.x + 'px';
+        imgRef.current.style.top = positionRef.current.y + 'px';
+      }
+      animationIdRef.current = requestAnimationFrame(tick);
     };
 
     window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+    tick();
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      if (animationIdRef.current) {
+        cancelAnimationFrame(animationIdRef.current);
+      }
+    };
+  }, [CONFIG.smooth, CONFIG.lerpFactor, CONFIG.offsetX, CONFIG.offsetY]);
+
+  // Floating animation keyframes as a style tag
+  // This is safe in React and will only be injected once per mount
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.innerHTML = `
+      @keyframes float {
+        0% { transform: translate(-50%, calc(-50% + 24px)) translateY(0px); }
+        50% { transform: translate(-50%, calc(-50% + 24px)) translateY(-12px); }
+        100% { transform: translate(-50%, calc(-50% + 24px)) translateY(0px); }
+      }
+    `;
+    document.head.appendChild(style);
+    return () => { document.head.removeChild(style); };
   }, []);
 
   return (
-    <motion.div
-      className="fixed pointer-events-none z-20 w-12 h-12"
-      animate={{
-        x: mousePosition.x - 6, // Much closer to cursor
-        y: mousePosition.y ,
-      }}
-      transition={{
-        type: "spring",
-        damping: 20,
-        stiffness: 100,
-        mass: 0.8,
-      }}
+    <img
+      ref={imgRef}
+      src={randomSprite}
+      alt="Following Pokemon"
       style={{
-        opacity: 0.6,
+        position: 'fixed',
+        width: '100px',
+        height: '100px',
+        pointerEvents: 'none',
+        userSelect: 'none',
+        zIndex: 9999,
+        transform: 'translate(-50%, calc(-50% + 24px))',
+        willChange: 'left, top',
+        opacity: 0.95,
+        filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.25))',
+        animation: 'float 2.2s ease-in-out infinite',
+        transition: 'filter 0.2s',
       }}
-    >
-      <motion.img
-        src={randomSprite}
-        alt="Following Pokemon"
-        className="w-full h-full"
-        animate={{
-          rotate: [0, 10, -10, 0],
-          scale: [1, 1.1, 0.9, 1],
-        }}
-        transition={{
-          duration: 2,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-      />
-    </motion.div>
+    />
   );
 }
