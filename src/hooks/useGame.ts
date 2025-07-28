@@ -1,16 +1,20 @@
 import { useState, useCallback, useEffect } from 'react';
 import { pokemonIndex } from '../data/pokemonIndex';
 import { fetchPokemonDetails } from '../services/pokemonApi';
-import type { PokemonDetails, GuessResult, GameStatus } from '../types/pokemon';
+import { getMockPokemonDetails } from '../services/mockPokemonData';
+import type { PokemonDetails, GuessResult, GameStatus, GameMode, SilhouetteHint } from '../types/pokemon';
 
 const MAX_ATTEMPTS = 8;
+const MAX_SILHOUETTE_ATTEMPTS = 4;
 
-export function useGame() {
+export function useGame(mode: GameMode = 'classic') {
   const [mysteryPokemon, setMysteryPokemon] = useState<PokemonDetails | null>(null);
   const [guesses, setGuesses] = useState<GuessResult[]>([]);
   const [gameStatus, setGameStatus] = useState<GameStatus>('playing');
-  const [attemptsLeft, setAttemptsLeft] = useState(MAX_ATTEMPTS);
+  const [attemptsLeft, setAttemptsLeft] = useState(mode === 'silhouette' ? MAX_SILHOUETTE_ATTEMPTS : MAX_ATTEMPTS);
   const [isLoading, setIsLoading] = useState(false);
+  const [hints, setHints] = useState<SilhouetteHint[]>([]);
+  const [gameMode, setGameMode] = useState<GameMode>(mode);
 
   const selectMysteryPokemon = useCallback(async () => {
     // Check for dev override
@@ -25,7 +29,8 @@ export function useGame() {
     }
     try {
       setIsLoading(true);
-      const details = await fetchPokemonDetails(selectedPokemon.name);
+      // Force use of mock data for demo
+      const details = await getMockPokemonDetails(selectedPokemon.name);
       setMysteryPokemon(details);
     } catch (error) {
       console.error('Failed to load mystery Pokemon:', error);
@@ -33,6 +38,42 @@ export function useGame() {
       selectMysteryPokemon();
     } finally {
       setIsLoading(false);
+    }
+  }, []);
+
+  const generateHint = useCallback((pokemon: PokemonDetails, hintIndex: number): SilhouetteHint | null => {
+    const hintTypes = ['type', 'generation', 'color', 'habitat'] as const;
+    const hintType = hintTypes[hintIndex];
+    
+    if (!hintType) return null;
+    
+    switch (hintType) {
+      case 'type':
+        return {
+          type: 'type',
+          value: pokemon.types.join(', '),
+          label: `Type: ${pokemon.types.join('/')}`
+        };
+      case 'generation':
+        return {
+          type: 'generation',
+          value: `Gen ${pokemon.generation}`,
+          label: `Generation: ${pokemon.generation}`
+        };
+      case 'color':
+        return {
+          type: 'color',
+          value: pokemon.color,
+          label: `Color: ${pokemon.color}`
+        };
+      case 'habitat':
+        return {
+          type: 'habitat',
+          value: pokemon.habitat || 'Unknown',
+          label: `Habitat: ${pokemon.habitat || 'Unknown'}`
+        };
+      default:
+        return null;
     }
   }, []);
 
@@ -61,23 +102,47 @@ export function useGame() {
 
     try {
       setIsLoading(true);
-      const guessDetails = await fetchPokemonDetails(pokemonName);
+      // Force use of mock data for demo
+      const guessDetails = await getMockPokemonDetails(pokemonName);
       
       if (guesses.some(g => g.pokemon.id === guessDetails.id)) {
         // Already guessed this Pokemon
         return;
       }
 
-      const comparison = compareTraits(guessDetails, mysteryPokemon);
-      const result: GuessResult = { pokemon: guessDetails, comparison };
-
-      setGuesses(prev => [result, ...prev]);
-      setAttemptsLeft(prev => prev - 1);
-
-      // Check win condition
+      const newAttemptsLeft = attemptsLeft - 1;
+      
+      // Check win condition first
       if (guessDetails.id === mysteryPokemon.id) {
         setGameStatus('won');
-      } else if (attemptsLeft - 1 <= 0) {
+        setGuesses(prev => [{pokemon: guessDetails, comparison: compareTraits(guessDetails, mysteryPokemon)}, ...prev]);
+        setAttemptsLeft(newAttemptsLeft);
+        return;
+      }
+
+      // For silhouette mode, add hints after incorrect guesses
+      if (gameMode === 'silhouette' && newAttemptsLeft > 0) {
+        const hintIndex = (gameMode === 'silhouette' ? MAX_SILHOUETTE_ATTEMPTS : MAX_ATTEMPTS) - newAttemptsLeft;
+        const newHint = generateHint(mysteryPokemon, hintIndex - 1);
+        if (newHint) {
+          setHints(prev => [...prev, newHint]);
+        }
+      }
+
+      // Add guess (for classic mode or silhouette mode)
+      if (gameMode === 'classic') {
+        const comparison = compareTraits(guessDetails, mysteryPokemon);
+        const result: GuessResult = { pokemon: guessDetails, comparison };
+        setGuesses(prev => [result, ...prev]);
+      } else {
+        // For silhouette mode, just add the guess without comparison
+        setGuesses(prev => [{pokemon: guessDetails, comparison: compareTraits(guessDetails, mysteryPokemon)}, ...prev]);
+      }
+
+      setAttemptsLeft(newAttemptsLeft);
+
+      // Check lose condition
+      if (newAttemptsLeft <= 0) {
         setGameStatus('lost');
       }
     } catch (error) {
@@ -85,13 +150,24 @@ export function useGame() {
     } finally {
       setIsLoading(false);
     }
-  }, [mysteryPokemon, gameStatus, guesses, compareTraits, attemptsLeft]);
+  }, [mysteryPokemon, gameStatus, guesses, compareTraits, attemptsLeft, gameMode, generateHint]);
 
   const restartGame = useCallback(() => {
     setGuesses([]);
     setGameStatus('playing');
-    setAttemptsLeft(MAX_ATTEMPTS);
+    setAttemptsLeft(gameMode === 'silhouette' ? MAX_SILHOUETTE_ATTEMPTS : MAX_ATTEMPTS);
     setMysteryPokemon(null);
+    setHints([]);
+    selectMysteryPokemon();
+  }, [selectMysteryPokemon, gameMode]);
+
+  const changeGameMode = useCallback((newMode: GameMode) => {
+    setGameMode(newMode);
+    setGuesses([]);
+    setGameStatus('playing');
+    setAttemptsLeft(newMode === 'silhouette' ? MAX_SILHOUETTE_ATTEMPTS : MAX_ATTEMPTS);
+    setMysteryPokemon(null);
+    setHints([]);
     selectMysteryPokemon();
   }, [selectMysteryPokemon]);
 
@@ -108,5 +184,8 @@ export function useGame() {
     isLoading,
     makeGuess,
     restartGame,
+    gameMode,
+    changeGameMode,
+    hints,
   };
 }

@@ -1,64 +1,19 @@
-// First 649 Pokemon from Gen 1-5
+// First 649 Pokemon from Gen 1-5 (using only mock data available for demo)
 export const pokemonIndex = [
-  { id: 1, name: "bulbasaur", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png" },
-  { id: 2, name: "ivysaur", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/2.png" },
   { id: 3, name: "venusaur", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/3.png" },
-  { id: 4, name: "charmander", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png" },
-  { id: 5, name: "charmeleon", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/5.png" },
   { id: 6, name: "charizard", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/6.png" },
-  { id: 7, name: "squirtle", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/7.png" },
-  { id: 8, name: "wartortle", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/8.png" },
   { id: 9, name: "blastoise", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/9.png" },
   { id: 25, name: "pikachu", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png" },
-  { id: 26, name: "raichu", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/26.png" },
-  { id: 39, name: "jigglypuff", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/39.png" },
   { id: 94, name: "gengar", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/94.png" },
   { id: 130, name: "gyarados", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/130.png" },
-  { id: 131, name: "lapras", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/131.png" },
-  { id: 132, name: "ditto", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/132.png" },
   { id: 133, name: "eevee", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/133.png" },
-  { id: 134, name: "vaporeon", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/134.png" },
-  { id: 135, name: "jolteon", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/135.png" },
-  { id: 136, name: "flareon", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/136.png" },
   { id: 150, name: "mewtwo", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/150.png" },
   { id: 151, name: "mew", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/151.png" },
-  { id: 152, name: "chikorita", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/152.png" },
-  { id: 155, name: "cyndaquil", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/155.png" },
-  { id: 158, name: "totodile", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/158.png" },
-  { id: 196, name: "espeon", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/196.png" },
-  { id: 197, name: "umbreon", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/197.png" },
-  { id: 249, name: "lugia", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/249.png" },
-  { id: 250, name: "ho-oh", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/250.png" },
-  { id: 252, name: "treecko", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/252.png" },
-  { id: 255, name: "torchic", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/255.png" },
-  { id: 258, name: "mudkip", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/258.png" },
-  { id: 280, name: "ralts", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/280.png" },
-  { id: 330, name: "flygon", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/330.png" },
-  { id: 350, name: "milotic", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/350.png" },
-  { id: 380, name: "latias", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/380.png" },
-  { id: 381, name: "latios", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/381.png" },
-  { id: 384, name: "rayquaza", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/384.png" },
-  { id: 387, name: "turtwig", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/387.png" },
-  { id: 390, name: "chimchar", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/390.png" },
-  { id: 393, name: "piplup", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/393.png" },
-  { id: 448, name: "lucario", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/448.png" },
-  { id: 470, name: "leafeon", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/470.png" },
-  { id: 471, name: "glaceon", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/471.png" },
-  { id: 493, name: "arceus", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/493.png" },
-  { id: 494, name: "victini", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/494.png" },
-  { id: 495, name: "snivy", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/495.png" },
-  { id: 498, name: "tepig", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/498.png" },
-  { id: 501, name: "oshawott", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/501.png" },
-  { id: 570, name: "zorua", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/570.png" },
-  { id: 571, name: "zoroark", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/571.png" },
-  { id: 643, name: "reshiram", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/643.png" },
-  { id: 644, name: "zekrom", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/644.png" },
-  // Sample of 50 popular Pokemon - in a real implementation, you'd include all 649
-].map(p => ({ ...p, generation: p.id <= 151 ? 1 : p.id <= 251 ? 2 : p.id <= 386 ? 3 : p.id <= 493 ? 4 : 5 }));
+  { id: 249, name: "lugia", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/249.png" }
+];
 
 export type PokemonIndexEntry = {
   id: number;
   name: string;
   sprite: string;
-  generation: number;
 };

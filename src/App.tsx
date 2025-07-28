@@ -2,6 +2,7 @@
 const t = {
   en: {
     guessPrompt: 'Guess the mystery Pokémon from Gen 1-5!',
+    silhouettePrompt: "Who's that Pokémon? Guess from the silhouette!",
     attemptsLeft: (n: number) => `${n} attempts left`,
     loading: 'Loading mystery Pokémon...',
     credits: 'Credits',
@@ -27,6 +28,7 @@ const t = {
   },
   fr: {
     guessPrompt: 'Devinez le Pokémon mystère de la Gén 1-5 !',
+    silhouettePrompt: 'Qui est ce Pokémon ? Devinez depuis la silhouette !',
     attemptsLeft: (n: number) => `${n} essais restants`,
     loading: 'Chargement du Pokémon mystère...',
     credits: 'Crédits',
@@ -63,6 +65,9 @@ import PokemonSearch from './components/PokemonSearch';
 import ComparisonTable from './components/ComparisonTable';
 import { GameResult } from './components/GameResult';
 import { MouseFollowPokemon } from './components/MouseFollowPokemon';
+import { GameModeSelector } from './components/GameModeSelector';
+import { SilhouetteDisplay } from './components/SilhouetteDisplay';
+import { HintDisplay } from './components/HintDisplay';
 import { useGame } from './hooks/useGame';
 import type { PokemonIndexEntry } from './data/pokemonIndex';
 
@@ -87,7 +92,10 @@ function App() {
     attemptsLeft, 
     isLoading, 
     makeGuess, 
-    restartGame 
+    restartGame,
+    gameMode,
+    changeGameMode,
+    hints
   } = useGame();
 
   // Ref for results section
@@ -299,6 +307,7 @@ function App() {
             onLanguageChange={(lang: string) => setLanguage(lang as 'en' | 'fr')}
             t={t[language]}
             restartGame={restartGame}
+            gameMode={gameMode}
           />
 
           {/* Info button is now in the header. */}
@@ -337,6 +346,23 @@ function App() {
 
           {mysteryPokemon && (
             <>
+              <GameModeSelector
+                currentMode={gameMode}
+                onModeChange={changeGameMode}
+                language={language}
+                disabled={gameStatus === 'playing' && (guesses.length > 0 || hints.length > 0)}
+              />
+
+              {gameMode === 'silhouette' && (
+                <>
+                  <SilhouetteDisplay 
+                    pokemon={mysteryPokemon}
+                    revealed={gameStatus === 'won' || gameStatus === 'lost'}
+                  />
+                  <HintDisplay hints={hints} language={language} />
+                </>
+              )}
+
               <div className="mb-8">
                 <PokemonSearch 
                   onPokemonSelect={handlePokemonSelect}
@@ -351,21 +377,43 @@ function App() {
                 />
               </div>
 
-              {/* Confetti and scroll target for results */}
-              <div ref={resultsRef} className="relative">
-                <Confetti trigger={gameStatus === 'won'} />
-                <motion.div
-                  layout
-                  className="backdrop-blur-lg border rounded-2xl p-6 mb-8 shadow-2xl bg-white/5 border-white/20"
-                >
-                  <ComparisonTable guesses={guesses} language={language} />
-                </motion.div>
-              </div>
+              {/* Show comparison table only for classic mode or when there are guesses */}
+              {(gameMode === 'classic' || guesses.length > 0) && (
+                <div ref={resultsRef} className="relative">
+                  <Confetti trigger={gameStatus === 'won'} />
+                  <motion.div
+                    layout
+                    className="backdrop-blur-lg border rounded-2xl p-6 mb-8 shadow-2xl bg-white/5 border-white/20"
+                  >
+                    {gameMode === 'classic' ? (
+                      <ComparisonTable guesses={guesses} language={language} />
+                    ) : (
+                      <div className="text-center">
+                        <h3 className="text-white text-lg font-semibold mb-4">
+                          {language === 'fr' ? 'Vos tentatives' : 'Your Guesses'}
+                        </h3>
+                        <div className="flex flex-wrap gap-2 justify-center">
+                          {guesses.map((guess, index) => (
+                            <div key={guess.pokemon.id} className="flex items-center gap-2 bg-white/10 rounded-lg p-2">
+                              <img 
+                                src={guess.pokemon.sprite} 
+                                alt={guess.pokemon.name}
+                                className="w-8 h-8"
+                              />
+                              <span className="text-white text-sm capitalize">{guess.pokemon.name}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </motion.div>
+                </div>
+              )}
 
               <GameResult 
                 gameStatus={gameStatus}
                 mysteryPokemon={mysteryPokemon}
-                attemptsUsed={8 - attemptsLeft}
+                attemptsUsed={(gameMode === 'silhouette' ? 4 : 8) - attemptsLeft}
                 onRestart={restartGame}
                 t={t[language]}
               />
