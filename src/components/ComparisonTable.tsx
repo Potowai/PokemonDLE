@@ -94,6 +94,7 @@ const TypeTag = ({ type }: { type: string }) => {
 interface ComparisonTableProps {
   guesses: GuessResult[];
   language: 'en' | 'fr';
+  mysteryPokemon: any;
 }
 
 const ComparisonIcon = ({ status }: { status: string }) => {
@@ -103,13 +104,13 @@ const ComparisonIcon = ({ status }: { status: string }) => {
     case 'incorrect':
       return <XCircle className="w-5 h-5 text-red-400" />;
     case 'higher':
-      return <ArrowUp className="w-5 h-5 text-yellow-400" />;
+      return <ArrowDown className="w-5 h-5 text-yellow-400" />;
     case 'lower':
-      return <ArrowDown className="w-5 h-5 text-yellow-400" />;
-    case 'heavier':
       return <ArrowUp className="w-5 h-5 text-yellow-400" />;
-    case 'lighter':
+    case 'heavier':
       return <ArrowDown className="w-5 h-5 text-yellow-400" />;
+    case 'lighter':
+      return <ArrowUp className="w-5 h-5 text-yellow-400" />;
     case 'missing':
       return <Minus className="w-5 h-5 text-gray-400" />;
     default:
@@ -135,7 +136,7 @@ const getStatusColor = (status: string) => {
   }
 };
 
-function ComparisonTable({ guesses, language }: ComparisonTableProps) {
+function ComparisonTable({ guesses, language, mysteryPokemon }: ComparisonTableProps) {
   const t = {
     en: {
       empty: 'Make your first guess to see the comparison table!',
@@ -211,8 +212,15 @@ function ComparisonTable({ guesses, language }: ComparisonTableProps) {
                 </div>
 
                 {/* Generation */}
-                <div className={`flex flex-col items-center justify-center p-3 backdrop-blur-md border rounded-lg ${getStatusColor(guess.comparison.generation)}`}>
-                  <ComparisonIcon status={guess.comparison.generation} />
+                <div className={`flex flex-col items-center justify-center p-3 backdrop-blur-md border rounded-lg ${guess.pokemon.generation === mysteryPokemon.generation ? getStatusColor(guess.comparison.generation) : 'bg-yellow-500/20 border-yellow-500/30'}`}>
+                  {/* Generation arrow logic */}
+                  {guess.pokemon.generation === mysteryPokemon.generation ? (
+                    <CheckCircle className="w-5 h-5 text-green-400" />
+                  ) : guess.pokemon.generation < mysteryPokemon.generation ? (
+                    <ArrowUp className="w-5 h-5 text-yellow-400" />
+                  ) : (
+                    <ArrowDown className="w-5 h-5 text-yellow-400" />
+                  )}
                   <span className="text-xs text-white/90 mt-1">{guess.pokemon.generation}</span>
                 </div>
 

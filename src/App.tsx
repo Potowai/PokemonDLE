@@ -389,7 +389,7 @@ function App() {
                     className="backdrop-blur-lg border rounded-2xl p-6 mb-8 shadow-2xl bg-white/5 border-white/20"
                   >
                     {gameMode === 'classic' ? (
-                      <ComparisonTable guesses={guesses} language={language} />
+                      <ComparisonTable guesses={guesses} language={language} mysteryPokemon={mysteryPokemon} />
                     ) : (
                       <div className="text-center">
                         <h3 className="text-white text-lg font-semibold mb-4">
