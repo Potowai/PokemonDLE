@@ -17,6 +17,9 @@
   80% { opacity: 1; }
   100% { transform: translateY(80vh) scale(0.7); opacity: 0; }
 }
+@keyframes fade-in { 0% { opacity: 0; } 100% { opacity: 1; } }
+
 .animate-confetti-left { animation: confetti-left 1.6s cubic-bezier(.6,.1,.4,1) forwards; }
 .animate-confetti-right { animation: confetti-right 1.6s cubic-bezier(.6,.1,.4,1) forwards; }
 .animate-sad-confetti { animation: sad-confetti 1.6s cubic-bezier(.6,.1,.4,1) forwards; }
+.animate-fade-in { animation: fade-in 0.3s; }

@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from './ui/button';
 import { RotateCcw, Share2 } from 'lucide-react';
+import { useToaster } from './ui/toaster';
 import type { GameStatus, PokemonDetails } from '../types/pokemon';
 
 interface GameResultProps {
@@ -27,28 +28,23 @@ interface GameResultProps {
 }
 
 export function GameResult({ gameStatus, mysteryPokemon, attemptsUsed, onRestart, t }: GameResultProps) {
+  const showToast = useToaster();
+
   if (gameStatus === 'playing' || !mysteryPokemon) {
     return null;
   }
 
   const handleShare = async () => {
-    const resultText = gameStatus === 'won' 
-      ? `🎉 I guessed ${mysteryPokemon.name} in ${attemptsUsed} attempts on PokéTraits!` 
-      : `😔 I couldn't guess ${mysteryPokemon.name} on PokéTraits... Try it yourself!`;
+    // Discord-friendly message
+    const resultText = gameStatus === 'won'
+      ? `🎉 I guessed **${mysteryPokemon.name}** in ${attemptsUsed} attempts on PokéTraits!\n${window.location.href}`
+      : `😔 I couldn't guess **${mysteryPokemon.name}** on PokéTraits...\n${window.location.href}\nTry it yourself!`;
 
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: 'PokéTraits',
-          text: resultText,
-          url: window.location.href,
-        });
-      } catch (error) {
-        // Fallback to clipboard
-        navigator.clipboard.writeText(resultText);
-      }
-    } else {
-      navigator.clipboard.writeText(resultText);
+    try {
+      await navigator.clipboard.writeText(resultText);
+      showToast('Result copied! Paste it anywhere you like.');
+    } catch (error) {
+      showToast('Failed to copy result.');
     }
   };
 
@@ -123,7 +119,7 @@ export function GameResult({ gameStatus, mysteryPokemon, attemptsUsed, onRestart
             <RotateCcw className="w-4 h-4" />
             {t.playAgain}
           </Button>
-          <Button onClick={handleShare} variant="outline" className="gap-2">
+          <Button onClick={handleShare} variant="outline" className="gap-2" title="Copy result for Discord">
             <Share2 className="w-4 h-4" />
             {t.share}
           </Button>
