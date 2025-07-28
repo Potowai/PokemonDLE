@@ -55,6 +55,7 @@ const t = {
 };
 import { useState, useRef, useEffect } from 'react';
 import { Confetti } from './components/Confetti';
+import { SadConfetti } from './components/SadConfetti';
 // Helper function for demo
 function getAppYear() {
   return new Date().getFullYear();
@@ -360,6 +361,8 @@ function App() {
                     revealed={gameStatus === 'won' || gameStatus === 'lost'}
                   />
                   <HintDisplay hints={hints} language={language} />
+                  {/* Sad confetti for lose */}
+                  <SadConfetti trigger={gameStatus === 'lost'} />
                 </>
               )}
 
@@ -393,17 +396,42 @@ function App() {
                           {language === 'fr' ? 'Vos tentatives' : 'Your Guesses'}
                         </h3>
                         <div className="flex flex-wrap gap-2 justify-center">
-                          {guesses.map((guess, index) => (
-                            <div key={guess.pokemon.id} className="flex items-center gap-2 bg-white/10 rounded-lg p-2">
-                              <img 
-                                src={guess.pokemon.sprite} 
-                                alt={guess.pokemon.name}
-                                className="w-8 h-8"
-                              />
-                              <span className="text-white text-sm capitalize">{guess.pokemon.name}</span>
-                            </div>
-                          ))}
+                          {guesses.map((guess, index) => {
+                            const isCorrect = guess.pokemon.id === mysteryPokemon.id;
+                            return (
+                              <div key={guess.pokemon.id} className="flex items-center gap-2 bg-white/10 rounded-lg p-2 relative">
+                                <img 
+                                  src={guess.pokemon.sprite} 
+                                  alt={guess.pokemon.name}
+                                  className="w-8 h-8"
+                                />
+                                <span className="text-white text-sm capitalize">{guess.pokemon.name}</span>
+                                {isCorrect ? (
+                                  <span className="absolute -top-2 -right-2">
+                                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                      <circle cx="16" cy="16" r="15" fill="#fff" fillOpacity="0.8" />
+                                      <path d="M10 17 L15 22 L22 10" stroke="#22C55E" strokeWidth="3" strokeLinecap="round" fill="none" />
+                                    </svg>
+                                  </span>
+                                ) : (
+                                  <span className="absolute -top-2 -right-2">
+                                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                      <circle cx="16" cy="16" r="15" fill="#fff" fillOpacity="0.8" />
+                                      <path d="M10 10 L22 22 M22 10 L10 22" stroke="#EF4444" strokeWidth="3" strokeLinecap="round" />
+                                    </svg>
+                                  </span>
+                                )}
+                              </div>
+                            );
+                          })}
                         </div>
+                        {gameStatus === 'lost' && (
+                          <div className="mt-6 text-center">
+                            <span className="text-3xl font-bold text-red-500 drop-shadow-lg">
+                              {language === 'fr' ? 'Vous avez perdu !' : 'You lose!'}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     )}
                   </motion.div>

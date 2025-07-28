@@ -240,7 +240,7 @@ function PokemonSearch({
                       {getDisplayName(pokemon, language)}
                     </div>
                     <div className="text-xs text-white/60">
-                      #{pokemon.id.toString().padStart(3, '0')} • Gen {pokemon.generation}
+                      #{pokemon.id.toString().padStart(3, '0')}
                     </div>
                   </div>
                 </motion.li>

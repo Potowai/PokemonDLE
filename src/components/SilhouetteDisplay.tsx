@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import type { PokemonDetails } from '../types/pokemon';
 
@@ -44,9 +43,6 @@ export function SilhouetteDisplay({ pokemon, revealed = false }: SilhouetteDispl
             transition={{ duration: 2, repeat: Infinity }}
             className="absolute inset-0 flex items-center justify-center"
           >
-            <div className="text-white/80 text-lg font-bold">
-              Who's that Pokémon?
-            </div>
           </motion.div>
         )}
       </motion.div>
