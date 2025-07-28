@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Zap, Trophy, Clock } from 'lucide-react';
 import { InfoIcon } from './icons/Info';
-import type { GameStatus } from '../types/pokemon';
+import type { GameStatus, GameMode } from '../types/pokemon';
 
 interface GameHeaderProps {
   attemptsLeft: number;
@@ -12,6 +12,7 @@ interface GameHeaderProps {
   onLanguageChange: (lang: string) => void;
   t: {
     guessPrompt: string;
+    silhouettePrompt: string;
     attemptsLeft: (n: number) => string;
     loading: string;
     credits: string;
@@ -25,9 +26,10 @@ interface GameHeaderProps {
     share: string;
   };
   restartGame?: () => void;
+  gameMode?: GameMode;
 }
 
-export function GameHeader({ attemptsLeft, gameStatus, onInfoClick, language, onLanguageChange, t, restartGame }: GameHeaderProps) {
+export function GameHeader({ attemptsLeft, gameStatus, onInfoClick, language, onLanguageChange, t, restartGame, gameMode = 'classic' }: GameHeaderProps) {
 
   // Always show Zap icon, animate only during 'playing'
   const statusIcon = <Zap className="w-6 h-6 text-blue-400" />;
@@ -81,7 +83,7 @@ export function GameHeader({ attemptsLeft, gameStatus, onInfoClick, language, on
       </div>
       
       <p className="text-white/80 text-lg mb-2">
-        {t.guessPrompt}
+        {gameMode === 'silhouette' ? t.silhouettePrompt : t.guessPrompt}
       </p>
       
       {gameStatus === 'playing' && (

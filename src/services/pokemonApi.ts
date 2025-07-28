@@ -1,6 +1,10 @@
 import type { PokemonDetails } from '../types/pokemon';
+import { getMockPokemonDetails, mockPokemonData } from './mockPokemonData';
 
 const cache = new Map<string, PokemonDetails>();
+
+// Check if we should use mock data (for demo purposes)
+const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === 'true' || typeof window !== 'undefined';
 
 // Helper function to determine evolution stage
 function getEvolutionStage(speciesData: any): number {
@@ -42,6 +46,17 @@ export async function fetchPokemonDetails(name: string): Promise<PokemonDetails>
     return cache.get(name)!;
   }
 
+  // Use mock data if API is not available or in demo mode
+  if (USE_MOCK_DATA || mockPokemonData[name.toLowerCase()]) {
+    try {
+      const mockData = await getMockPokemonDetails(name);
+      cache.set(name, mockData);
+      return mockData;
+    } catch (error) {
+      // Fall through to API if mock data doesn't have the Pokemon
+    }
+  }
+
   try {
     // 8% chance for shiny sprite in game
     const isShiny = Math.random() < 0.08;
@@ -72,6 +87,12 @@ export async function fetchPokemonDetails(name: string): Promise<PokemonDetails>
     return details;
   } catch (error) {
     console.error(`Failed to fetch Pokemon details for ${name}:`, error);
+    // Try mock data as fallback
+    if (mockPokemonData[name.toLowerCase()]) {
+      const mockData = await getMockPokemonDetails(name);
+      cache.set(name, mockData);
+      return mockData;
+    }
     throw error;
   }
 }
