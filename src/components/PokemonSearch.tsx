@@ -22,6 +22,7 @@ export interface PokemonSearchProps {
   limit?: number;                 // how many results to show
   guessed?: Array<number | string>; // ids or names already chosen
   language?: 'en' | 'fr';
+  pokemonList?: PokemonIndexEntry[];
 }
 
 /** Utility: get display name by language */
@@ -31,8 +32,8 @@ const getDisplayName = (p: PokemonIndexEntry, lang: 'en' | 'fr') => {
 };
 
 /** Build a searchable collection that includes FR names so Fuse can match them too */
-const makeSearchCollection = (lang: 'en' | 'fr') =>
-  pokemonIndex.map((p) => ({
+const makeSearchCollection = (lang: 'en' | 'fr', list: PokemonIndexEntry[]) =>
+  list.map((p) => ({
     ...p,
     altName: pokemonNamesFr[p.id] || '',
     // Optionally normalise diacritics here if needed
@@ -45,6 +46,7 @@ function PokemonSearch({
   limit = 8,
   guessed = [],
   language = 'en',
+  pokemonList = pokemonIndex,
 }: PokemonSearchProps) {
   // -------------------- State --------------------
   const [query, setQuery] = useState('');
@@ -58,7 +60,7 @@ function PokemonSearch({
   const listboxId = useId(); // React 18 id helper
 
   // -------------------- Data / Fuse --------------
-  const searchedCollection = useMemo(() => makeSearchCollection(language), [language]);
+  const searchedCollection = useMemo(() => makeSearchCollection(language, pokemonList), [language, pokemonList]);
 
   const fuse = useMemo(() => {
     return new Fuse(searchedCollection, {
@@ -153,12 +155,25 @@ function PokemonSearch({
         e.preventDefault();
         setHighlighted((h) => Math.max(h - 1, 0));
         break;
-      case 'Enter':
+      case 'Enter': {
         if (highlighted >= 0 && results[highlighted]) {
           e.preventDefault();
           select(results[highlighted]);
+        } else if (query.trim()) {
+          // Try to match by name (EN or FR)
+          const match = results.find(p => {
+            const en = p.name.toLowerCase();
+            const fr = (pokemonNamesFr[p.id] || '').toLowerCase();
+            const q = query.trim().toLowerCase();
+            return en === q || fr === q;
+          });
+          if (match) {
+            e.preventDefault();
+            select(match);
+          }
         }
         break;
+      }
       case 'Escape':
         setIsOpen(false);
         setHighlighted(-1);

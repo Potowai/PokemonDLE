@@ -24,6 +24,12 @@ export function GameModeSelector({ currentMode, onModeChange, language, disabled
       title: language === 'fr' ? 'Silhouette' : "Who's That Pokémon",
       description: language === 'fr' ? 'Devinez la silhouette' : 'Guess the silhouette',
     },
+    {
+      id: 'fusion' as GameMode,
+      icon: <Search className="w-5 h-5" />,
+      title: language === 'fr' ? 'Fusion' : 'Fusion Guess',
+      description: language === 'fr' ? 'Devinez la fusion Pokémon' : 'Guess the Pokémon fusion',
+    },
   ];
 
   return (

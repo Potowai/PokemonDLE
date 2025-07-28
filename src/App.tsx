@@ -25,6 +25,18 @@ const t = {
     habitat: 'Habitat',
     unknown: 'Unknown',
     heightWeight: 'Height / Weight',
+    fusionGuess: 'Guess the Fusion!',
+    correctParts: 'Correct Parts',
+    wrongParts: 'Wrong Parts',
+    part: 'Part',
+    noGuesses: 'No guesses yet.',
+    yourGuess: 'Your Guess',
+    checkGuess: 'Check Guess',
+    swapParts: 'Swap Parts',
+    resetPuzzle: 'Reset Puzzle',
+    giveUp: 'Give Up',
+    solution: 'The solution is:',
+    tryAgain: 'Try Again',
   },
   fr: {
     guessPrompt: 'Devinez le Pokémon mystère de la Gén 1-5 !',
@@ -51,6 +63,18 @@ const t = {
     habitat: 'Habitat',
     unknown: 'Inconnu',
     heightWeight: 'Taille / Poids',
+    fusionGuess: 'Devinez la Fusion !',
+    correctParts: 'Parts Correctes',
+    wrongParts: 'Parts Incorrectes',
+    part: 'Partie',
+    noGuesses: 'Pas encore de suppositions.',
+    yourGuess: 'Votre Supposition',
+    checkGuess: 'Vérifier la Supposition',
+    swapParts: 'Échanger les Parties',
+    resetPuzzle: 'Réinitialiser le Puzzle',
+    giveUp: 'Abandonner',
+    solution: 'La solution est :',
+    tryAgain: 'Réessayer',
   }
 };
 import { useState, useRef, useEffect } from 'react';
@@ -71,6 +95,8 @@ import { SilhouetteDisplay } from './components/SilhouetteDisplay';
 import { HintDisplay } from './components/HintDisplay';
 import { useGame } from './hooks/useGame';
 import type { PokemonIndexEntry } from './data/pokemonIndex';
+import { FusionGuess } from './components/FusionGuess';
+import { pokemonIndex } from './data/pokemonIndex';
 
 
 function App() {
@@ -136,6 +162,9 @@ function App() {
       makeGuess(pokemon.name);
     }
   };
+
+  // Build a map of id => English name for fusion guesses
+  const pokemonNamesEn = Object.fromEntries(pokemonIndex.map(p => [p.id, p.name.charAt(0).toUpperCase() + p.name.slice(1)]));
 
   return (
     <div className="min-h-screen relative bg-gradient-to-br from-gray-950 via-slate-900 to-gray-900">
@@ -353,6 +382,14 @@ function App() {
                 language={language}
                 disabled={gameStatus === 'playing' && (guesses.length > 0 || hints.length > 0)}
               />
+              {gameMode === 'fusion' && (
+                <FusionGuess
+                  t={t[language]}
+                  language={language}
+                  attemptsLeft={attemptsLeft}
+                  restartGame={restartGame}
+                />
+              )}
 
               {gameMode === 'silhouette' && (
                 <>
@@ -366,19 +403,22 @@ function App() {
                 </>
               )}
 
-              <div className="mb-8">
-                <PokemonSearch 
-                  onPokemonSelect={handlePokemonSelect}
-                  disabled={gameStatus !== 'playing' || isLoading}
-                  placeholder={
-                    gameStatus !== 'playing' ? t[language].searchPlaceholderOver :
-                    isLoading ? t[language].searchPlaceholderLoading :
-                    t[language].searchPlaceholder
-                  }
-                  guessed={guesses.map(g => g.pokemon.id)}
-                  language={language}
-                />
-              </div>
+              {/* Only show PokemonSearch for non-fusion modes */}
+              {gameMode !== 'fusion' && (
+                <div className="mb-8">
+                  <PokemonSearch 
+                    onPokemonSelect={handlePokemonSelect}
+                    disabled={gameStatus !== 'playing' || isLoading}
+                    placeholder={
+                      gameStatus !== 'playing' ? t[language].searchPlaceholderOver :
+                      isLoading ? t[language].searchPlaceholderLoading :
+                      t[language].searchPlaceholder
+                    }
+                    guessed={guesses.map(g => g.pokemon.id)}
+                    language={language}
+                  />
+                </div>
+              )}
 
               {/* Show comparison table only for classic mode or when there are guesses */}
               {(gameMode === 'classic' || guesses.length > 0) && (
@@ -445,6 +485,8 @@ function App() {
                 onRestart={restartGame}
                 t={t[language]}
               />
+
+              
             </>
           )}
         </motion.div>

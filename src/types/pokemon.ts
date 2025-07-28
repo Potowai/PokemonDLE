@@ -27,7 +27,7 @@ export interface GuessResult {
 
 export type GameStatus = 'playing' | 'won' | 'lost';
 
-export type GameMode = 'classic' | 'silhouette';
+export type GameMode = 'classic' | 'silhouette' | 'fusion';
 
 export interface SilhouetteHint {
   type: 'type' | 'generation' | 'color' | 'habitat';
