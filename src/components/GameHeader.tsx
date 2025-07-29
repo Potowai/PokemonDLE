@@ -1,8 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Zap, Trophy, Clock } from 'lucide-react';
+import { Zap } from 'lucide-react';
 import { InfoIcon } from './icons/Info';
 import type { GameStatus, GameMode } from '../types/pokemon';
+import type { Translation } from '../data/translations';
 
 interface GameHeaderProps {
   attemptsLeft: number;
@@ -10,21 +11,7 @@ interface GameHeaderProps {
   onInfoClick?: () => void;
   language: string;
   onLanguageChange: (lang: string) => void;
-  t: {
-    guessPrompt: string;
-    silhouettePrompt: string;
-    attemptsLeft: (n: number) => string;
-    loading: string;
-    credits: string;
-    creditsText: (year: number) => string;
-    gameOver: string;
-    finished: string;
-    searchPlaceholder: string;
-    searchPlaceholderLoading: string;
-    searchPlaceholderOver: string;
-    playAgain: string;
-    share: string;
-  };
+  t: Translation;
   restartGame?: () => void;
   gameMode?: GameMode;
 }

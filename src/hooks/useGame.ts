@@ -1,11 +1,8 @@
 import { useState, useCallback, useEffect } from 'react';
 import { pokemonIndex } from '../data/pokemonIndex';
-import { fetchPokemonDetails } from '../services/pokemonApi';
 import { getMockPokemonDetails } from '../services/mockPokemonData';
+import { MAX_ATTEMPTS, MAX_SILHOUETTE_ATTEMPTS } from '../constants/gameConstants';
 import type { PokemonDetails, GuessResult, GameStatus, GameMode, SilhouetteHint } from '../types/pokemon';
-
-const MAX_ATTEMPTS = 8;
-const MAX_SILHOUETTE_ATTEMPTS = 4;
 
 export function useGame(mode: GameMode = 'classic') {
   const [mysteryPokemon, setMysteryPokemon] = useState<PokemonDetails | null>(null);
