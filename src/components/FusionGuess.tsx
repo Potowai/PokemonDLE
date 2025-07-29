@@ -1,100 +1,36 @@
-import { useState, useEffect } from 'react';
-
+import PokemonSearch from './PokemonSearch';
 import { pokemonNamesFrGen1 } from '../data/pokemonNames.fr.gen1';
 import { pokemonIndexGen1 } from '../data/pokemonIndex.gen1';
-import PokemonSearch from './PokemonSearch';
-
-// IDs for Gen 1 Pokémon only
-const MIN_ID = 1;
-const MAX_ID = 151;
-const MAX_ATTEMPTS = 6;
-
-function getRandomId() {
-  // Clamp to Gen 1 range
-  return Math.max(MIN_ID, Math.min(MAX_ID, Math.floor(Math.random() * (MAX_ID - MIN_ID + 1)) + MIN_ID));
-}
+import { useFusionGame } from '../hooks/useFusionGame';
+import { getFusionImageUrl, isPokemonInFusion } from '../utils/fusion';
+import type { Translation } from '../data/translations';
 
 interface FusionGuessProps {
-  t: Record<string, any>;
+  t: Translation;
   language: 'en' | 'fr';
-    attemptsLeft: number;
+  attemptsLeft: number;
   restartGame: () => void;
 }
 
 export function FusionGuess({ t, language, attemptsLeft, restartGame }: FusionGuessProps) {
-  const [ids, setIds] = useState([getRandomId(), getRandomId()]);
-  const [guesses, setGuesses] = useState<[null | { id: number; name: string }, null | { id: number; name: string }]>([null, null]);
-  const [status, setStatus] = useState('playing'); // 'playing', 'won', 'lost'
-  const [showAnswer, setShowAnswer] = useState(false);
-  // Track history of guesses
-  const [guessHistory, setGuessHistory] = useState<Array<[null | { id: number; name: string }, null | { id: number; name: string }]>>([]);
+  const fusionGame = useFusionGame(attemptsLeft, restartGame);
+  const { fusionIds, guesses, status, showAnswer, guessHistory, setGuess, submitGuess, restart } = fusionGame;
 
-  useEffect(() => {
-    if (status === 'won' || status === 'lost') setShowAnswer(true);
-    // Log the correct fusion answer to the console
-    const en = [
-      pokemonIndexGen1.find(p => p.id === ids[0])?.name,
-      pokemonIndexGen1.find(p => p.id === ids[1])?.name
-    ];
-    console.log(`Fusion answer: ids = ${ids[0]}, ${ids[1]} | EN = ${en[0]} & ${en[1]}`);
-  }, [ids, status]);
-
-  const fusionImgUrl = `https://images.alexonsager.net/pokemon/fused/${ids[1]}/${ids[1]}.${ids[0]}.png`;
+  const fusionImgUrl = getFusionImageUrl(fusionIds[0], fusionIds[1]);
   const answerNamesEn = [
-    pokemonIndexGen1.find(p => p.id === ids[0])?.name,
-    pokemonIndexGen1.find(p => p.id === ids[1])?.name
+    pokemonIndexGen1.find(p => p.id === fusionIds[0])?.name,
+    pokemonIndexGen1.find(p => p.id === fusionIds[1])?.name
   ];
-  const answerNamesFr = [pokemonNamesFrGen1[ids[0]], pokemonNamesFrGen1[ids[1]]];
+  const answerNamesFr = [pokemonNamesFrGen1[fusionIds[0]], pokemonNamesFrGen1[fusionIds[1]]];
 
   function handleGuessSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (status !== 'playing') return;
-    if (!guesses[0] || !guesses[1]) return;
-    setGuessHistory(h => [...h, guesses]);
-    const guessIds = [guesses[0].id, guesses[1].id];
-    const correctIds = [ids[0], ids[1]];
-    // Accept any order
-    const isCorrect =
-      (guessIds[0] === correctIds[0] && guessIds[1] === correctIds[1]) ||
-      (guessIds[0] === correctIds[1] && guessIds[1] === correctIds[0]);
-    if (isCorrect) {
-      setStatus('won');
-    } else {
-      if (attemptsLeft <= 1) {
-        setStatus('lost');
-      }
-      // attemptsLeft is managed by App.tsx
-    }
+    submitGuess();
   }
 
-  function handleSelect(idx: number, pokemon: { id: number; name: string }) {
-    setGuesses(g => g.map((v, i) => (i === idx ? pokemon : v)) as [typeof guesses[0], typeof guesses[1]]);
+  function handleSelect(idx: 0 | 1, pokemon: { id: number; name: string }) {
+    setGuess(idx, pokemon);
   }
-
-  // Prevent fusing the same Pokémon
-  function getValidRandomIds() {
-    let id1 = getRandomId();
-    let id2 = getRandomId();
-    while (id2 === id1) {
-      id2 = getRandomId();
-    }
-    return [id1, id2];
-  }
-
-  // Use getValidRandomIds for new fusion
-  function handleRestart() {
-    setIds(getValidRandomIds());
-    setGuesses([null, null]);
-    setStatus('playing');
-    setShowAnswer(false);
-    setGuessHistory([]);
-    restartGame();
-  }
-
-  // On mount, set valid random ids
-  useEffect(() => {
-    setIds(getValidRandomIds());
-  }, []);
 
   return (
     <div className="max-w-md mx-auto text-center py-8">
@@ -117,7 +53,7 @@ export function FusionGuess({ t, language, attemptsLeft, restartGame }: FusionGu
                 <img src={pokemonIndexGen1.find(p => p.id === guesses[0]?.id)?.sprite} alt={guesses[0]?.name} className="w-12 h-12" />
               </div>
             )}
-            {guesses[0] && status !== 'playing' && guesses[0].id !== ids[0] && guesses[0].id !== ids[1] && (
+            {guesses[0] && status !== 'playing' && !isPokemonInFusion(guesses[0].id, fusionIds) && (
               <span className="absolute -top-4 left-1/2 -translate-x-1/2">
                 <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <circle cx="16" cy="16" r="15" fill="#fff" fillOpacity="0.8" />
@@ -141,7 +77,7 @@ export function FusionGuess({ t, language, attemptsLeft, restartGame }: FusionGu
                 <img src={pokemonIndexGen1.find(p => p.id === guesses[1]?.id)?.sprite} alt={guesses[1]?.name} className="w-12 h-12" />
               </div>
             )}
-            {guesses[1] && status !== 'playing' && guesses[1].id !== ids[0] && guesses[1].id !== ids[1] && (
+            {guesses[1] && status !== 'playing' && !isPokemonInFusion(guesses[1].id, fusionIds) && (
               <span className="absolute -top-4 left-1/2 -translate-x-1/2">
                 <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <circle cx="16" cy="16" r="15" fill="#fff" fillOpacity="0.8" />
@@ -168,7 +104,7 @@ export function FusionGuess({ t, language, attemptsLeft, restartGame }: FusionGu
                     {pair[0].name}
                   </span>
                 )}
-                {pair[0] && pair[0].id !== ids[0] && pair[0].id !== ids[1] && (
+                {pair[0] && !isPokemonInFusion(pair[0].id, fusionIds) && (
                   <span className="text-red-500 text-xl font-bold">✗</span>
                 )}
               </div>
@@ -178,7 +114,7 @@ export function FusionGuess({ t, language, attemptsLeft, restartGame }: FusionGu
                     {pair[1].name}
                   </span>
                 )}
-                {pair[1] && pair[1].id !== ids[0] && pair[1].id !== ids[1] && (
+                {pair[1] && !isPokemonInFusion(pair[1].id, fusionIds) && (
                   <span className="text-red-500 text-xl font-bold">✗</span>
                 )}
               </div>
@@ -202,7 +138,7 @@ export function FusionGuess({ t, language, attemptsLeft, restartGame }: FusionGu
             <br />
             <span className="text-sm text-white/70">({answerNamesFr[0]} & {answerNamesFr[1]})</span>
           </div>
-          <button onClick={handleRestart} className="mt-4 px-6 py-2 rounded-lg bg-blue-500 text-white font-bold shadow hover:bg-blue-600 transition">{t.playAgain || 'Play Again'}</button>
+          <button onClick={restart} className="mt-4 px-6 py-2 rounded-lg bg-blue-500 text-white font-bold shadow hover:bg-blue-600 transition">{t.playAgain || 'Play Again'}</button>
         </div>
       )}
     </div>

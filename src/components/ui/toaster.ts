@@ -1,5 +1,3 @@
-import { useEffect } from 'react';
-
 export function useToaster() {
   function showToast(message: string, duration = 2500) {
     const toast = document.createElement('div');

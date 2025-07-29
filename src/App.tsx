@@ -1,90 +1,9 @@
-// Translation object
-const t = {
-  en: {
-    guessPrompt: 'Guess the mystery Pokémon from Gen 1-5!',
-    silhouettePrompt: "Who's that Pokémon? Guess from the silhouette!",
-    attemptsLeft: (n: number) => `${n} attempts left`,
-    loading: 'Loading mystery Pokémon...',
-    credits: 'Credits',
-    creditsText: (year: number) => `PokemonDLE by Potowai, ${year}\nMIT License`,
-    gameOver: 'Game Over',
-    finished: 'Game Over',
-    searchPlaceholder: 'Search for a Pokémon...',
-    searchPlaceholderLoading: 'Loading...',
-    searchPlaceholderOver: 'Game Over',
-    playAgain: 'Play Again',
-    share: 'Share',
-    mysteryWas: 'The mystery Pokémon was:',
-    generation: 'Generation',
-    type: 'Type',
-    color: 'Color',
-    evolution: 'Evolution',
-    stage1: '1st Stage',
-    stage2: '2nd Stage',
-    stage3: '3rd Stage',
-    habitat: 'Habitat',
-    unknown: 'Unknown',
-    heightWeight: 'Height / Weight',
-    fusionGuess: 'Guess the Fusion!',
-    correctParts: 'Correct Parts',
-    wrongParts: 'Wrong Parts',
-    part: 'Part',
-    noGuesses: 'No guesses yet.',
-    yourGuess: 'Your Guess',
-    checkGuess: 'Check Guess',
-    swapParts: 'Swap Parts',
-    resetPuzzle: 'Reset Puzzle',
-    giveUp: 'Give Up',
-    solution: 'The solution is:',
-    tryAgain: 'Try Again',
-  },
-  fr: {
-    guessPrompt: 'Devinez le Pokémon mystère de la Gén 1-5 !',
-    silhouettePrompt: 'Qui est ce Pokémon ? Devinez depuis la silhouette !',
-    attemptsLeft: (n: number) => `${n} essais restants`,
-    loading: 'Chargement du Pokémon mystère...',
-    credits: 'Crédits',
-    creditsText: (year: number) => `PokemonDLE par Potowai, ${year}\nLicence MIT`,
-    gameOver: 'Partie terminée',
-    finished: 'Partie terminée',
-    searchPlaceholder: 'Rechercher un Pokémon...',
-    searchPlaceholderLoading: 'Chargement...',
-    searchPlaceholderOver: 'Partie terminée',
-    playAgain: 'Rejouer',
-    share: 'Partager',
-    mysteryWas: 'Le Pokémon mystère était :',
-    generation: 'Génération',
-    type: 'Type',
-    color: 'Couleur',
-    evolution: 'Évolution',
-    stage1: '1ère étape',
-    stage2: '2ème étape',
-    stage3: '3ème étape',
-    habitat: 'Habitat',
-    unknown: 'Inconnu',
-    heightWeight: 'Taille / Poids',
-    fusionGuess: 'Devinez la Fusion !',
-    correctParts: 'Parts Correctes',
-    wrongParts: 'Parts Incorrectes',
-    part: 'Partie',
-    noGuesses: 'Pas encore de suppositions.',
-    yourGuess: 'Votre Supposition',
-    checkGuess: 'Vérifier la Supposition',
-    swapParts: 'Échanger les Parties',
-    resetPuzzle: 'Réinitialiser le Puzzle',
-    giveUp: 'Abandonner',
-    solution: 'La solution est :',
-    tryAgain: 'Réessayer',
-  }
-};
 import { useState, useRef, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { translations, getAppYear } from './data/translations';
 import { Confetti } from './components/Confetti';
 import { SadConfetti } from './components/SadConfetti';
-// Helper function for demo
-function getAppYear() {
-  return new Date().getFullYear();
-}
-import { motion } from 'framer-motion';
+import { BackgroundAnimations } from './components/BackgroundAnimations';
 import { GameHeader } from './components/GameHeader';
 import PokemonSearch from './components/PokemonSearch';
 import ComparisonTable from './components/ComparisonTable';
@@ -96,7 +15,6 @@ import { HintDisplay } from './components/HintDisplay';
 import { useGame } from './hooks/useGame';
 import type { PokemonIndexEntry } from './data/pokemonIndex';
 import { FusionGuess } from './components/FusionGuess';
-import { pokemonIndex } from './data/pokemonIndex';
 
 
 function App() {
@@ -139,8 +57,10 @@ function App() {
           // Wait a bit longer to ensure all traits are rendered
           setTimeout(() => {
             if (!el) return;
-            if (typeof (el as any).scrollIntoViewIfNeeded === 'function') {
-              (el as any).scrollIntoViewIfNeeded(true);
+            // Check for non-standard scrollIntoViewIfNeeded method (Safari/WebKit)
+            const elementWithScrollMethod = el as HTMLElement & { scrollIntoViewIfNeeded?: (centerIfNeeded?: boolean) => void };
+            if (typeof elementWithScrollMethod.scrollIntoViewIfNeeded === 'function') {
+              elementWithScrollMethod.scrollIntoViewIfNeeded(true);
             } else {
               el.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
@@ -163,164 +83,14 @@ function App() {
     }
   };
 
-  // Build a map of id => English name for fusion guesses
-  const pokemonNamesEn = Object.fromEntries(pokemonIndex.map(p => [p.id, p.name.charAt(0).toUpperCase() + p.name.slice(1)]));
+  // Get current translations
+  const t = translations[language];
 
   return (
     <div className="min-h-screen relative bg-gradient-to-br from-gray-950 via-slate-900 to-gray-900">
       
       {/* Background Effects */}
-      <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.02%22%3E%3Ccircle%20cx%3D%2230%22%20cy%3D%2230%22%20r%3D%222%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-30"></div>
-        
-        {/* Helper function for random sprites */}
-        {(() => {
-          const getRandomBackgroundSprite = (id: number) => {
-            const isShiny = Math.random() < 0.05; // 5% chance for shiny in background
-            return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${isShiny ? 'shiny/' : ''}${id}.png`;
-          };
-          
-          return (
-            <>
-        {/* Animated Pokemon sprites */}
-        <motion.div
-          className="absolute top-16 left-16 w-16 h-16 opacity-20"
-          animate={{
-            x: [0, 100, -50, 0],
-            y: [0, -30, 50, 0],
-            rotate: [0, 180, 360],
-          }}
-          transition={{
-            duration: 15,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        >
-          <img src={getRandomBackgroundSprite(25)} alt="Pikachu" className="w-full h-full" />
-        </motion.div>
-        
-        <motion.div
-          className="absolute top-32 right-20 w-20 h-20 opacity-15"
-          animate={{
-            x: [0, -80, 40, 0],
-            y: [0, 60, -40, 0],
-            rotate: [0, -90, 180, 0],
-          }}
-          transition={{
-            duration: 18,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 2
-          }}
-        >
-          <img src={getRandomBackgroundSprite(6)} alt="Charizard" className="w-full h-full" />
-        </motion.div>
-        
-        <motion.div
-          className="absolute bottom-40 left-20 w-14 h-14 opacity-25"
-          animate={{
-            x: [0, 70, -30, 0],
-            y: [0, -50, 30, 0],
-            rotate: [0, 270, 180, 0],
-          }}
-          transition={{
-            duration: 12,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 4
-          }}
-        >
-          <img src={getRandomBackgroundSprite(9)} alt="Blastoise" className="w-full h-full" />
-        </motion.div>
-        
-        <motion.div
-          className="absolute top-1/2 left-8 w-12 h-12 opacity-20"
-          animate={{
-            x: [0, 90, -20, 0],
-            y: [0, -40, 60, 0],
-            rotate: [0, 180, -90, 0],
-          }}
-          transition={{
-            duration: 20,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 1
-          }}
-        >
-          <img src={getRandomBackgroundSprite(3)} alt="Venusaur" className="w-full h-full" />
-        </motion.div>
-        
-        <motion.div
-          className="absolute bottom-20 right-32 w-18 h-18 opacity-15"
-          animate={{
-            x: [0, -60, 80, 0],
-            y: [0, 40, -60, 0],
-            rotate: [0, -180, 90, 0],
-          }}
-          transition={{
-            duration: 16,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 3
-          }}
-        >
-          <img src={getRandomBackgroundSprite(94)} alt="Gengar" className="w-full h-full" />
-        </motion.div>
-        
-        <motion.div
-          className="absolute top-20 right-1/3 w-16 h-16 opacity-20"
-          animate={{
-            x: [0, -50, 30, 0],
-            y: [0, 70, -20, 0],
-            rotate: [0, 90, -180, 0],
-          }}
-          transition={{
-            duration: 14,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 5
-          }}
-        >
-          <img src={getRandomBackgroundSprite(130)} alt="Gyarados" className="w-full h-full" />
-        </motion.div>
-        
-        <motion.div
-          className="absolute bottom-32 left-1/2 w-14 h-14 opacity-25"
-          animate={{
-            x: [0, 40, -70, 0],
-            y: [0, -30, 50, 0],
-            rotate: [0, -90, 270, 0],
-          }}
-          transition={{
-            duration: 13,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 6
-          }}
-        >
-          <img src={getRandomBackgroundSprite(133)} alt="Eevee" className="w-full h-full" />
-        </motion.div>
-        
-        <motion.div
-          className="absolute top-1/3 right-16 w-12 h-12 opacity-15"
-          animate={{
-            x: [0, -80, 20, 0],
-            y: [0, 50, -80, 0],
-            rotate: [0, 180, -270, 0],
-          }}
-          transition={{
-            duration: 17,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 7
-          }}
-        >
-          <img src={getRandomBackgroundSprite(150)} alt="Mewtwo" className="w-full h-full" />
-        </motion.div>
-            </>
-          );
-        })()}
-      </div>
+      <BackgroundAnimations />
 
       <div className="relative z-10 container mx-auto px-4 py-8">
         <motion.div
@@ -335,7 +105,7 @@ function App() {
             onInfoClick={handleToggleCredits}
             language={language}
             onLanguageChange={(lang: string) => setLanguage(lang as 'en' | 'fr')}
-            t={t[language]}
+            t={t}
             restartGame={restartGame}
             gameMode={gameMode}
           />
@@ -353,8 +123,8 @@ function App() {
                 </div>
                 <div className="mt-2">
                   <div className="rounded-lg border border-white/20 bg-white/10 backdrop-blur-md text-white shadow-lg p-8 text-center">
-                    <h2 className="text-2xl font-bold mb-2">{t[language].credits}</h2>
-                    <p className="mb-4" style={{ whiteSpace: 'pre-line' }}>{t[language].creditsText(getAppYear())}</p>
+                    <h2 className="text-2xl font-bold mb-2">{t.credits}</h2>
+                    <p className="mb-4" style={{ whiteSpace: 'pre-line' }}>{t.creditsText(getAppYear())}</p>
                   </div>
                 </div>
               </div>
@@ -369,7 +139,7 @@ function App() {
                 className="w-8 h-8 border-2 border-white/20 border-t-white/60 rounded-full mx-auto mb-4"
               />
               <span className="text-white/60">
-                {t[language].loading}
+                {t.loading}
               </span>
             </div>
           )}
@@ -384,7 +154,7 @@ function App() {
               />
               {gameMode === 'fusion' && (
                 <FusionGuess
-                  t={t[language]}
+                  t={t}
                   language={language}
                   attemptsLeft={attemptsLeft}
                   restartGame={restartGame}
@@ -410,9 +180,9 @@ function App() {
                     onPokemonSelect={handlePokemonSelect}
                     disabled={gameStatus !== 'playing' || isLoading}
                     placeholder={
-                      gameStatus !== 'playing' ? t[language].searchPlaceholderOver :
-                      isLoading ? t[language].searchPlaceholderLoading :
-                      t[language].searchPlaceholder
+                      gameStatus !== 'playing' ? t.searchPlaceholderOver :
+                      isLoading ? t.searchPlaceholderLoading :
+                      t.searchPlaceholder
                     }
                     guessed={guesses.map(g => g.pokemon.id)}
                     language={language}
@@ -436,7 +206,7 @@ function App() {
                           {language === 'fr' ? 'Vos tentatives' : 'Your Guesses'}
                         </h3>
                         <div className="flex flex-wrap gap-2 justify-center">
-                          {guesses.map((guess, index) => {
+                          {guesses.map((guess) => {
                             const isCorrect = guess.pokemon.id === mysteryPokemon.id;
                             return (
                               <div key={guess.pokemon.id} className="flex items-center gap-2 bg-white/10 rounded-lg p-2 relative">
@@ -483,7 +253,7 @@ function App() {
                 mysteryPokemon={mysteryPokemon}
                 attemptsUsed={(gameMode === 'silhouette' ? 4 : 8) - attemptsLeft}
                 onRestart={restartGame}
-                t={t[language]}
+                t={t}
               />
 
               

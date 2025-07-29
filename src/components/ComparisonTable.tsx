@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle, XCircle, ArrowUp, ArrowDown, Minus } from 'lucide-react';
-import type { GuessResult } from '../types/pokemon';
+import type { GuessResult, PokemonDetails } from '../types/pokemon';
 
 // Type color mappings for gradients
 const typeColors: Record<string, string> = {
@@ -94,7 +94,7 @@ const TypeTag = ({ type }: { type: string }) => {
 interface ComparisonTableProps {
   guesses: GuessResult[];
   language: 'en' | 'fr';
-  mysteryPokemon: any;
+  mysteryPokemon: PokemonDetails;
 }
 
 const ComparisonIcon = ({ status }: { status: string }) => {

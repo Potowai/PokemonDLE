@@ -43,7 +43,7 @@ export function GameResult({ gameStatus, mysteryPokemon, attemptsUsed, onRestart
     try {
       await navigator.clipboard.writeText(resultText);
       showToast('Result copied! Paste it anywhere you like.');
-    } catch (error) {
+    } catch {
       showToast('Failed to copy result.');
     }
   };
