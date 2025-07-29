@@ -57,8 +57,10 @@ function App() {
           // Wait a bit longer to ensure all traits are rendered
           setTimeout(() => {
             if (!el) return;
-            if (typeof (el as any).scrollIntoViewIfNeeded === 'function') {
-              (el as any).scrollIntoViewIfNeeded(true);
+            // Check for non-standard scrollIntoViewIfNeeded method (Safari/WebKit)
+            const elementWithScrollMethod = el as HTMLElement & { scrollIntoViewIfNeeded?: (centerIfNeeded?: boolean) => void };
+            if (typeof elementWithScrollMethod.scrollIntoViewIfNeeded === 'function') {
+              elementWithScrollMethod.scrollIntoViewIfNeeded(true);
             } else {
               el.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
