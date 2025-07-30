@@ -27,10 +27,18 @@ export interface GuessResult {
 
 export type GameStatus = 'playing' | 'won' | 'lost';
 
-export type GameMode = 'classic' | 'silhouette' | 'fusion';
+export type GameMode = 'classic' | 'silhouette' | 'fusion' | 'region';
 
 export interface SilhouetteHint {
   type: 'type' | 'generation' | 'color' | 'habitat';
   value: string;
   label: string;
+}
+
+export interface Region {
+  id: number;
+  name: string;
+  image: string;
+  generation: number;
+  description?: string;
 }

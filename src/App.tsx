@@ -12,6 +12,7 @@ import { MouseFollowPokemon } from './components/MouseFollowPokemon';
 import { GameModeSelector } from './components/GameModeSelector';
 import { SilhouetteDisplay } from './components/SilhouetteDisplay';
 import { HintDisplay } from './components/HintDisplay';
+import { RegionGuess } from './components/RegionGuess';
 import { useGame } from './hooks/useGame';
 import type { PokemonIndexEntry } from './data/pokemonIndex';
 import { FusionGuess } from './components/FusionGuess';
@@ -32,11 +33,14 @@ function App() {
   }
   const { 
     mysteryPokemon, 
+    mysteryRegion,
     guesses, 
+    regionGuesses,
     gameStatus, 
     attemptsLeft, 
     isLoading, 
     makeGuess, 
+    makeRegionGuess,
     restartGame,
     gameMode,
     changeGameMode,
@@ -131,7 +135,7 @@ function App() {
             </div>
           )}
 
-          {isLoading && !mysteryPokemon && (
+          {isLoading && !mysteryPokemon && !mysteryRegion && (
             <div className="text-center text-white/60">
               <motion.div
                 animate={{ rotate: 360 }}
@@ -139,19 +143,36 @@ function App() {
                 className="w-8 h-8 border-2 border-white/20 border-t-white/60 rounded-full mx-auto mb-4"
               />
               <span className="text-white/60">
-                {t.loading}
+                {gameMode === 'region' ? 
+                  (language === 'fr' ? 'Chargement de la région...' : 'Loading region...') :
+                  t.loading
+                }
               </span>
             </div>
           )}
 
-          {mysteryPokemon && (
+          {(mysteryPokemon || mysteryRegion) && (
             <>
               <GameModeSelector
                 currentMode={gameMode}
                 onModeChange={changeGameMode}
                 language={language}
-                disabled={gameStatus === 'playing' && (guesses.length > 0 || hints.length > 0)}
+                disabled={gameStatus === 'playing' && (guesses.length > 0 || hints.length > 0 || regionGuesses.length > 0)}
               />
+              
+              {gameMode === 'region' && mysteryRegion && (
+                <RegionGuess
+                  t={t}
+                  language={language}
+                  attemptsLeft={attemptsLeft}
+                  onGuess={makeRegionGuess}
+                  mysteryRegion={mysteryRegion}
+                  gameStatus={gameStatus}
+                  guesses={regionGuesses}
+                  onRestart={restartGame}
+                />
+              )}
+
               {gameMode === 'fusion' && (
                 <FusionGuess
                   t={t}
@@ -161,7 +182,7 @@ function App() {
                 />
               )}
 
-              {gameMode === 'silhouette' && (
+              {gameMode === 'silhouette' && mysteryPokemon && (
                 <>
                   <SilhouetteDisplay 
                     pokemon={mysteryPokemon}
@@ -173,8 +194,8 @@ function App() {
                 </>
               )}
 
-              {/* Only show PokemonSearch for non-fusion modes */}
-              {gameMode !== 'fusion' && (
+              {/* Only show PokemonSearch for non-fusion and non-region modes */}
+              {gameMode !== 'fusion' && gameMode !== 'region' && (
                 <div className="mb-8">
                   <PokemonSearch 
                     onPokemonSelect={handlePokemonSelect}
@@ -191,7 +212,7 @@ function App() {
               )}
 
               {/* Show comparison table only for classic mode or when there are guesses */}
-              {(gameMode === 'classic' || guesses.length > 0) && (
+              {(gameMode === 'classic' || guesses.length > 0) && gameMode !== 'region' && (
                 <div ref={resultsRef} className="relative">
                   <Confetti trigger={gameStatus === 'won'} />
                   <motion.div
@@ -199,7 +220,7 @@ function App() {
                     className="backdrop-blur-lg border rounded-2xl p-6 mb-8 shadow-2xl bg-white/5 border-white/20"
                   >
                     {gameMode === 'classic' ? (
-                      <ComparisonTable guesses={guesses} language={language} mysteryPokemon={mysteryPokemon} />
+                      <ComparisonTable guesses={guesses} language={language} mysteryPokemon={mysteryPokemon!} />
                     ) : (
                       <div className="text-center">
                         <h3 className="text-white text-lg font-semibold mb-4">
@@ -207,7 +228,7 @@ function App() {
                         </h3>
                         <div className="flex flex-wrap gap-2 justify-center">
                           {guesses.map((guess) => {
-                            const isCorrect = guess.pokemon.id === mysteryPokemon.id;
+                            const isCorrect = guess.pokemon.id === mysteryPokemon?.id;
                             return (
                               <div key={guess.pokemon.id} className="flex items-center gap-2 bg-white/10 rounded-lg p-2 relative">
                                 <img 
@@ -248,13 +269,16 @@ function App() {
                 </div>
               )}
 
-              <GameResult 
-                gameStatus={gameStatus}
-                mysteryPokemon={mysteryPokemon}
-                attemptsUsed={(gameMode === 'silhouette' ? 4 : 8) - attemptsLeft}
-                onRestart={restartGame}
-                t={t}
-              />
+              {/* Only show GameResult for non-region modes */}
+              {gameMode !== 'region' && (
+                <GameResult 
+                  gameStatus={gameStatus}
+                  mysteryPokemon={mysteryPokemon!}
+                  attemptsUsed={(gameMode === 'silhouette' ? 4 : 8) - attemptsLeft}
+                  onRestart={restartGame}
+                  t={t}
+                />
+              )}
 
               
             </>
