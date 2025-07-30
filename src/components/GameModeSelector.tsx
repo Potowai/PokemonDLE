@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Search, HelpCircle } from 'lucide-react';
+import { Search, HelpCircle, MapPin } from 'lucide-react';
 import type { GameMode } from '../types/pokemon';
 
 interface GameModeSelectorProps {
@@ -25,6 +25,12 @@ export function GameModeSelector({ currentMode, onModeChange, language, disabled
       description: language === 'fr' ? 'Devinez la silhouette' : 'Guess the silhouette',
     },
     {
+      id: 'region' as GameMode,
+      icon: <MapPin className="w-5 h-5" />,
+      title: language === 'fr' ? 'Région' : 'Region Guess',
+      description: language === 'fr' ? 'Devinez la région' : 'Guess the region',
+    },
+    {
       id: 'fusion' as GameMode,
       icon: <Search className="w-5 h-5" />,
       title: language === 'fr' ? 'Fusion' : 'Fusion Guess',
@@ -41,7 +47,7 @@ export function GameModeSelector({ currentMode, onModeChange, language, disabled
             onClick={() => !disabled && onModeChange(mode.id)}
             disabled={disabled}
             className={`
-              relative px-6 py-3 rounded-xl border transition-all duration-200 flex items-center gap-3 min-w-[200px]
+              relative px-6 py-3 rounded-xl border transition-all duration-200 flex items-center gap-3 min-w-[180px]
               ${currentMode === mode.id 
                 ? 'bg-white/20 border-white/40 text-white shadow-lg' 
                 : 'bg-white/5 border-white/20 text-white/70 hover:bg-white/10 hover:text-white'

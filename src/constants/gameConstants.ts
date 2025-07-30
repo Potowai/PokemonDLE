@@ -2,6 +2,7 @@
 export const MAX_ATTEMPTS = 8;
 export const MAX_SILHOUETTE_ATTEMPTS = 4;
 export const MAX_FUSION_ATTEMPTS = 6;
+export const MAX_REGION_ATTEMPTS = 6;
 
 // Pokemon ID ranges
 export const POKEMON_ID_RANGES = {
@@ -15,7 +16,8 @@ export const POKEMON_ID_RANGES = {
 export const GAME_MODES = {
   CLASSIC: 'classic',
   SILHOUETTE: 'silhouette', 
-  FUSION: 'fusion'
+  FUSION: 'fusion',
+  REGION: 'region'
 } as const;
 
 // Animation constants

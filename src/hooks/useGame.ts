@@ -1,19 +1,33 @@
 import { useState, useCallback, useEffect } from 'react';
 import { pokemonIndex } from '../data/pokemonIndex';
 import { getMockPokemonDetails } from '../services/mockPokemonData';
-import { MAX_ATTEMPTS, MAX_SILHOUETTE_ATTEMPTS } from '../constants/gameConstants';
-import type { PokemonDetails, GuessResult, GameStatus, GameMode, SilhouetteHint } from '../types/pokemon';
+import { regionsData, getRandomRegion } from '../data/regionData';
+import { MAX_ATTEMPTS, MAX_SILHOUETTE_ATTEMPTS, MAX_REGION_ATTEMPTS } from '../constants/gameConstants';
+import type { PokemonDetails, GuessResult, GameStatus, GameMode, SilhouetteHint, Region } from '../types/pokemon';
 
 export function useGame(mode: GameMode = 'classic') {
   const [mysteryPokemon, setMysteryPokemon] = useState<PokemonDetails | null>(null);
+  const [mysteryRegion, setMysteryRegion] = useState<Region | null>(null);
   const [guesses, setGuesses] = useState<GuessResult[]>([]);
+  const [regionGuesses, setRegionGuesses] = useState<{ region: string; correct: boolean }[]>([]);
   const [gameStatus, setGameStatus] = useState<GameStatus>('playing');
-  const [attemptsLeft, setAttemptsLeft] = useState(mode === 'silhouette' ? MAX_SILHOUETTE_ATTEMPTS : MAX_ATTEMPTS);
+  const [attemptsLeft, setAttemptsLeft] = useState(
+    mode === 'silhouette' ? MAX_SILHOUETTE_ATTEMPTS : 
+    mode === 'region' ? MAX_REGION_ATTEMPTS : 
+    MAX_ATTEMPTS
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [hints, setHints] = useState<SilhouetteHint[]>([]);
   const [gameMode, setGameMode] = useState<GameMode>(mode);
 
   const selectMysteryPokemon = useCallback(async () => {
+    if (gameMode === 'region') {
+      // For region mode, select a random region instead
+      const selectedRegion = getRandomRegion();
+      setMysteryRegion(selectedRegion);
+      return;
+    }
+
     // Check for dev override
     const forceId = import.meta.env.VITE_FORCE_POKEMON;
     let selectedPokemon;
@@ -36,7 +50,7 @@ export function useGame(mode: GameMode = 'classic') {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [gameMode]);
 
   const generateHint = useCallback((pokemon: PokemonDetails, hintIndex: number): SilhouetteHint | null => {
     const hintTypes = ['type', 'generation', 'color', 'habitat'] as const;
@@ -149,11 +163,36 @@ export function useGame(mode: GameMode = 'classic') {
     }
   }, [mysteryPokemon, gameStatus, guesses, compareTraits, attemptsLeft, gameMode, generateHint]);
 
+  const makeRegionGuess = useCallback((regionName: string): boolean => {
+    if (!mysteryRegion || gameStatus !== 'playing') return false;
+
+    const isCorrect = regionName.toLowerCase() === mysteryRegion.name.toLowerCase();
+    const newAttemptsLeft = attemptsLeft - 1;
+
+    // Add guess to region guesses
+    setRegionGuesses(prev => [...prev, { region: regionName, correct: isCorrect }]);
+    setAttemptsLeft(newAttemptsLeft);
+
+    if (isCorrect) {
+      setGameStatus('won');
+    } else if (newAttemptsLeft <= 0) {
+      setGameStatus('lost');
+    }
+
+    return isCorrect;
+  }, [mysteryRegion, gameStatus, attemptsLeft]);
+
   const restartGame = useCallback(() => {
     setGuesses([]);
+    setRegionGuesses([]);
     setGameStatus('playing');
-    setAttemptsLeft(gameMode === 'silhouette' ? MAX_SILHOUETTE_ATTEMPTS : MAX_ATTEMPTS);
+    setAttemptsLeft(
+      gameMode === 'silhouette' ? MAX_SILHOUETTE_ATTEMPTS : 
+      gameMode === 'region' ? MAX_REGION_ATTEMPTS :
+      MAX_ATTEMPTS
+    );
     setMysteryPokemon(null);
+    setMysteryRegion(null);
     setHints([]);
     selectMysteryPokemon();
   }, [selectMysteryPokemon, gameMode]);
@@ -161,9 +200,15 @@ export function useGame(mode: GameMode = 'classic') {
   const changeGameMode = useCallback((newMode: GameMode) => {
     setGameMode(newMode);
     setGuesses([]);
+    setRegionGuesses([]);
     setGameStatus('playing');
-    setAttemptsLeft(newMode === 'silhouette' ? MAX_SILHOUETTE_ATTEMPTS : MAX_ATTEMPTS);
+    setAttemptsLeft(
+      newMode === 'silhouette' ? MAX_SILHOUETTE_ATTEMPTS : 
+      newMode === 'region' ? MAX_REGION_ATTEMPTS :
+      MAX_ATTEMPTS
+    );
     setMysteryPokemon(null);
+    setMysteryRegion(null);
     setHints([]);
     selectMysteryPokemon();
   }, [selectMysteryPokemon]);
@@ -175,11 +220,14 @@ export function useGame(mode: GameMode = 'classic') {
 
   return {
     mysteryPokemon,
+    mysteryRegion,
     guesses,
+    regionGuesses,
     gameStatus,
     attemptsLeft,
     isLoading,
     makeGuess,
+    makeRegionGuess,
     restartGame,
     gameMode,
     changeGameMode,

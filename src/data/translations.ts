@@ -1,6 +1,7 @@
 export interface Translation {
   guessPrompt: string;
   silhouettePrompt: string;
+  regionPrompt: string;
   attemptsLeft: (n: number) => string;
   loading: string;
   credits: string;
@@ -35,12 +36,19 @@ export interface Translation {
   giveUp: string;
   solution: string;
   tryAgain: string;
+  regionGuess: string;
+  regionName: string;
+  enterRegionName: string;
+  correctRegion: string;
+  wrongRegion: string;
+  theRegionWas: string;
 }
 
 export const translations: Record<'en' | 'fr', Translation> = {
   en: {
     guessPrompt: 'Guess the mystery Pokémon from Gen 1-5!',
     silhouettePrompt: "Who's that Pokémon? Guess from the silhouette!",
+    regionPrompt: 'Which Pokémon region is this?',
     attemptsLeft: (n: number) => `${n} attempts left`,
     loading: 'Loading mystery Pokémon...',
     credits: 'Credits',
@@ -75,10 +83,17 @@ export const translations: Record<'en' | 'fr', Translation> = {
     giveUp: 'Give Up',
     solution: 'The solution is:',
     tryAgain: 'Try Again',
+    regionGuess: 'Guess the Region!',
+    regionName: 'Region Name',
+    enterRegionName: 'Enter region name...',
+    correctRegion: 'Correct! This is',
+    wrongRegion: 'Wrong! Try again.',
+    theRegionWas: 'The region was:',
   },
   fr: {
     guessPrompt: 'Devinez le Pokémon mystère de la Gén 1-5 !',
     silhouettePrompt: 'Qui est ce Pokémon ? Devinez depuis la silhouette !',
+    regionPrompt: 'Quelle région Pokémon est-ce ?',
     attemptsLeft: (n: number) => `${n} essais restants`,
     loading: 'Chargement du Pokémon mystère...',
     credits: 'Crédits',
@@ -113,6 +128,12 @@ export const translations: Record<'en' | 'fr', Translation> = {
     giveUp: 'Abandonner',
     solution: 'La solution est :',
     tryAgain: 'Réessayer',
+    regionGuess: 'Devinez la Région !',
+    regionName: 'Nom de la Région',
+    enterRegionName: 'Entrez le nom de la région...',
+    correctRegion: 'Correct ! C\'est',
+    wrongRegion: 'Faux ! Réessayez.',
+    theRegionWas: 'La région était :',
   }
 };
 
