@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { pokemonIndex } from '../data/pokemonIndex';
 import { getMockPokemonDetails } from '../services/mockPokemonData';
-import { regionsData, getRandomRegion } from '../data/regionData';
+import { getRandomRegion } from '../data/regionData';
 import { MAX_ATTEMPTS, MAX_SILHOUETTE_ATTEMPTS, MAX_REGION_ATTEMPTS } from '../constants/gameConstants';
 import type { PokemonDetails, GuessResult, GameStatus, GameMode, SilhouetteHint, Region } from '../types/pokemon';
 

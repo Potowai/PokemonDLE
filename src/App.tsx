@@ -164,7 +164,6 @@ function App() {
                 <RegionGuess
                   t={t}
                   language={language}
-                  attemptsLeft={attemptsLeft}
                   onGuess={makeRegionGuess}
                   mysteryRegion={mysteryRegion}
                   gameStatus={gameStatus}

@@ -3,12 +3,11 @@ import { motion } from 'framer-motion';
 import { CheckCircle, XCircle, MapPin } from 'lucide-react';
 import type { Region } from '../types/pokemon';
 import type { Translation } from '../data/translations';
-import { regionsData, searchRegions } from '../data/regionData';
+import { searchRegions } from '../data/regionData';
 
 interface RegionGuessProps {
   t: Translation;
   language: 'en' | 'fr';
-  attemptsLeft: number;
   onGuess: (regionName: string) => boolean;
   mysteryRegion: Region | null;
   gameStatus: 'playing' | 'won' | 'lost';
@@ -19,7 +18,6 @@ interface RegionGuessProps {
 export function RegionGuess({ 
   t, 
   language, 
-  attemptsLeft, 
   onGuess, 
   mysteryRegion, 
   gameStatus, 
