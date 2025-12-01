@@ -1,41 +1,4 @@
-// French names for the supported Pokémon (id => name)
-export const pokemonNamesFr: Record<number, string> = {
-  1: "Bulbizarre",
-  2: "Herbizarre",
-  3: "Florizarre",
-  4: "Salamèche",
-  5: "Reptincel",
-  6: "Dracaufeu",
-  7: "Carapuce",
-  8: "Carabaffe",
-  9: "Tortank",
-  25: "Pikachu",
-  26: "Raichu",
-  39: "Rondoudou",
-  94: "Ectoplasma",
-  130: "Léviator",
-  131: "Lokhlass",
-  132: "Métamorph",
-  133: "Évoli",
-  134: "Aquali",
-  135: "Voltali",
-  136: "Pyroli",
-  150: "Mewtwo",
-  151: "Mew",
-  152: "Germignon",
-  155: "Héricendre",
-  158: "Kaiminus",
-  196: "Mentali",
-  197: "Noctali",
-  249: "Lugia",
-  250: "Ho-Oh",
-  252: "Arcko",
-  255: "Poussifeu",
-  258: "Gobou",
-  280: "Tarsal",
-  330: "Libégon",
-  350: "Milobellus",
-  380: "Latias",
-  381: "Latios",
-  384: "Rayquaza"
-};
+// Complete French names for all supported Pokémon from Gen 1-5 (id => name)
+import { pokemonNamesFrComplete } from './pokemonNames.fr.complete';
+
+export const pokemonNamesFr = pokemonNamesFrComplete;
