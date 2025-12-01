@@ -25,61 +25,65 @@ export function GameHeader({ attemptsLeft, gameStatus, onInfoClick, language, on
     <motion.div
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="text-center mb-8"
+      className="text-center mb-6"
     >
-      <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-4 max-w-full px-2">
-        <motion.div
-          animate={{ rotate: gameStatus === 'playing' ? [0, 10, -10, 0] : 0 }}
-          transition={{ duration: 2, repeat: gameStatus === 'playing' ? Infinity : 0 }}
-        >
-          {statusIcon}
-        </motion.div>
-        <h1
-          className="text-2xl sm:text-4xl font-bold text-white flex flex-wrap items-center gap-2 max-w-full overflow-x-auto"
-          style={{ wordBreak: 'break-word' }}
-        >
-          <span
-            className="cursor-pointer hover:underline truncate max-w-[60vw] sm:max-w-none"
-            onClick={restartGame}
-            tabIndex={0}
-            role="button"
-            aria-label="Restart game"
+      {/* Top Row: Title and Controls */}
+      <div className="flex flex-col items-center justify-center relative mb-4">
+
+        {/* Title Section */}
+        <div className="flex items-center gap-3 mb-3">
+          <motion.div
+            animate={{ rotate: gameStatus === 'playing' ? [0, 10, -10, 0] : 0 }}
+            transition={{ duration: 2, repeat: gameStatus === 'playing' ? Infinity : 0 }}
           >
-            PokemonDLE
-          </span>
-          <button
-            type="button"
-            aria-label="Show info / credits"
-            onClick={typeof onInfoClick === 'function' ? onInfoClick : undefined}
-            className="ml-1 sm:ml-2 text-white/70 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-400 rounded-full p-1 flex items-center justify-center"
-            style={{ width: 28, height: 28 }}
-          >
-            <InfoIcon width={22} height={22} />
-          </button>
+            {statusIcon}
+          </motion.div>
+          <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
+            <span
+              className="cursor-pointer hover:text-blue-400 transition-colors"
+              onClick={restartGame}
+              role="button"
+              tabIndex={0}
+            >
+              PokemonDLE
+            </span>
+          </h1>
+        </div>
+
+        {/* Controls Row */}
+        <div className="flex items-center gap-4">
           <select
             value={language}
             onChange={e => onLanguageChange(e.target.value)}
-            className="ml-1 sm:ml-3 px-2 py-1 rounded bg-white text-gray-900 text-sm sm:text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="bg-white/10 border border-white/20 text-white text-sm rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-400"
             aria-label="Select language"
-            style={{ minWidth: 80 }}
           >
-            <option value="en">English</option>
-            <option value="fr">Français</option>
+            <option value="en" className="text-gray-900">English</option>
+            <option value="fr" className="text-gray-900">Français</option>
           </select>
-        </h1>
+
+          <button
+            type="button"
+            aria-label="Show info / credits"
+            onClick={onInfoClick}
+            className="text-white/70 hover:text-white transition-colors p-1.5 hover:bg-white/10 rounded-full"
+          >
+            <InfoIcon width={20} height={20} />
+          </button>
+        </div>
       </div>
-      
-      <p className="text-white/80 text-lg mb-2">
+
+      <p className="text-white/80 text-base sm:text-lg mb-4 max-w-md mx-auto leading-relaxed">
         {gameMode === 'silhouette' ? t.silhouettePrompt : t.guessPrompt}
       </p>
-      
+
       {gameStatus === 'playing' && (
         <motion.div
-          className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full"
+          className="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-500/20 border border-blue-500/30 rounded-full"
           animate={{ scale: attemptsLeft <= 2 ? [1, 1.05, 1] : 1 }}
           transition={{ duration: 0.5, repeat: attemptsLeft <= 2 ? Infinity : 0 }}
         >
-          <span className={`font-semibold ${attemptsLeft <= 2 ? 'text-red-400' : 'text-white'}`}>
+          <span className={`text-sm font-semibold ${attemptsLeft <= 2 ? 'text-red-300' : 'text-blue-100'}`}>
             {t.attemptsLeft(attemptsLeft)}
           </span>
         </motion.div>

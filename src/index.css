@@ -23,3 +23,11 @@
 .animate-confetti-right { animation: confetti-right 1.6s cubic-bezier(.6,.1,.4,1) forwards; }
 .animate-sad-confetti { animation: sad-confetti 1.6s cubic-bezier(.6,.1,.4,1) forwards; }
 .animate-fade-in { animation: fade-in 0.3s; }
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

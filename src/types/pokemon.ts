@@ -41,4 +41,8 @@ export interface Region {
   image: string;
   generation: number;
   description?: string;
+  names?: {
+    en: string;
+    fr: string;
+  };
 }

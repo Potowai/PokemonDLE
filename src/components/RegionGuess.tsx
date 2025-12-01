@@ -3,12 +3,11 @@ import { motion } from 'framer-motion';
 import { CheckCircle, XCircle, MapPin } from 'lucide-react';
 import type { Region } from '../types/pokemon';
 import type { Translation } from '../data/translations';
-import { regionsData, searchRegions } from '../data/regionData';
+import { searchRegions } from '../data/regionData';
 
 interface RegionGuessProps {
   t: Translation;
   language: 'en' | 'fr';
-  attemptsLeft: number;
   onGuess: (regionName: string) => boolean;
   mysteryRegion: Region | null;
   gameStatus: 'playing' | 'won' | 'lost';
@@ -16,15 +15,14 @@ interface RegionGuessProps {
   onRestart: () => void;
 }
 
-export function RegionGuess({ 
-  t, 
-  language, 
-  attemptsLeft, 
-  onGuess, 
-  mysteryRegion, 
-  gameStatus, 
+export function RegionGuess({
+  t,
+  language,
+  onGuess,
+  mysteryRegion,
+  gameStatus,
   guesses,
-  onRestart 
+  onRestart
 }: RegionGuessProps) {
   const [inputValue, setInputValue] = useState('');
   const [suggestions, setSuggestions] = useState<Region[]>([]);
@@ -34,7 +32,7 @@ export function RegionGuess({
 
   useEffect(() => {
     if (inputValue.trim()) {
-      const filtered = searchRegions(inputValue);
+      const filtered = searchRegions(inputValue, language);
       setSuggestions(filtered);
       setShowSuggestions(true);
     } else {
@@ -42,13 +40,13 @@ export function RegionGuess({
       setShowSuggestions(false);
     }
     setSelectedIndex(-1);
-  }, [inputValue]);
+  }, [inputValue, language]);
 
   const handleSubmit = (regionName: string) => {
     if (gameStatus !== 'playing' || !regionName.trim()) return;
 
     const isCorrect = onGuess(regionName.trim());
-    
+
     if (isCorrect) {
       setFeedback(`${t.correctRegion} ${regionName}!`);
     } else {
@@ -74,20 +72,22 @@ export function RegionGuess({
     switch (e.key) {
       case 'ArrowDown':
         e.preventDefault();
-        setSelectedIndex(prev => 
+        setSelectedIndex(prev =>
           prev < suggestions.length - 1 ? prev + 1 : 0
         );
         break;
       case 'ArrowUp':
         e.preventDefault();
-        setSelectedIndex(prev => 
+        setSelectedIndex(prev =>
           prev > 0 ? prev - 1 : suggestions.length - 1
         );
         break;
       case 'Enter':
         e.preventDefault();
         if (selectedIndex >= 0) {
-          handleSubmit(suggestions[selectedIndex].name);
+          const region = suggestions[selectedIndex];
+          const name = region.names ? region.names[language] : region.name;
+          handleSubmit(name);
         } else {
           handleSubmit(inputValue);
         }
@@ -100,7 +100,8 @@ export function RegionGuess({
   };
 
   const handleSuggestionClick = (region: Region) => {
-    handleSubmit(region.name);
+    const name = region.names ? region.names[language] : region.name;
+    handleSubmit(name);
   };
 
   if (!mysteryRegion) {
@@ -116,6 +117,8 @@ export function RegionGuess({
     );
   }
 
+  const mysteryRegionName = mysteryRegion.names ? mysteryRegion.names[language] : mysteryRegion.name;
+
   return (
     <div className="max-w-2xl mx-auto">
       {/* Region Image */}
@@ -128,11 +131,11 @@ export function RegionGuess({
         <div className="relative inline-block">
           <img
             src={mysteryRegion.image}
-            alt={gameStatus === 'won' || gameStatus === 'lost' ? mysteryRegion.name : 'Mystery Region'}
-            className="max-w-full h-auto max-h-80 rounded-lg shadow-lg border border-white/20"
+            alt={gameStatus === 'won' || gameStatus === 'lost' ? mysteryRegionName : 'Mystery Region'}
+            className="max-w-full h-auto max-h-60 md:max-h-80 rounded-lg shadow-lg border border-white/20"
             onError={(e) => {
               // Fallback to a placeholder if image fails to load
-              e.currentTarget.src = `https://via.placeholder.com/400x300/374151/9CA3AF?text=${mysteryRegion.name}`;
+              e.currentTarget.src = `https://via.placeholder.com/400x300/374151/9CA3AF?text=${mysteryRegionName}`;
             }}
           />
           {gameStatus === 'playing' && (
@@ -172,10 +175,10 @@ export function RegionGuess({
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder={t.enterRegionName}
-              className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent"
+              className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent text-base md:text-sm"
               autoFocus
             />
-            
+
             {/* Suggestions Dropdown */}
             {showSuggestions && suggestions.length > 0 && (
               <div className="absolute top-full left-0 right-0 mt-1 bg-slate-800/95 backdrop-blur-sm border border-white/20 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto">
@@ -183,11 +186,10 @@ export function RegionGuess({
                   <button
                     key={region.id}
                     onClick={() => handleSuggestionClick(region)}
-                    className={`w-full px-4 py-2 text-left text-white hover:bg-white/10 transition-colors ${
-                      index === selectedIndex ? 'bg-white/15' : ''
-                    }`}
+                    className={`w-full px-4 py-2 text-left text-white hover:bg-white/10 transition-colors ${index === selectedIndex ? 'bg-white/15' : ''
+                      }`}
                   >
-                    <div className="font-medium">{region.name}</div>
+                    <div className="font-medium">{region.names ? region.names[language] : region.name}</div>
                     <div className="text-sm text-white/60">Generation {region.generation}</div>
                   </button>
                 ))}
@@ -203,11 +205,10 @@ export function RegionGuess({
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.9 }}
-          className={`mb-6 p-4 rounded-lg text-center ${
-            feedback.includes(t.correctRegion) 
-              ? 'bg-green-500/20 border border-green-500/40 text-green-200' 
-              : 'bg-red-500/20 border border-red-500/40 text-red-200'
-          }`}
+          className={`mb-6 p-4 rounded-lg text-center ${feedback.includes(t.correctRegion)
+            ? 'bg-green-500/20 border border-green-500/40 text-green-200'
+            : 'bg-red-500/20 border border-red-500/40 text-red-200'
+            }`}
         >
           {feedback}
         </motion.div>
@@ -228,11 +229,10 @@ export function RegionGuess({
             {guesses.map((guess, index) => (
               <div
                 key={index}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg ${
-                  guess.correct
-                    ? 'bg-green-500/20 border border-green-500/40'
-                    : 'bg-red-500/20 border border-red-500/40'
-                }`}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg ${guess.correct
+                  ? 'bg-green-500/20 border border-green-500/40'
+                  : 'bg-red-500/20 border border-red-500/40'
+                  }`}
               >
                 <span className="text-white text-sm capitalize">{guess.region}</span>
                 {guess.correct ? (
@@ -254,21 +254,19 @@ export function RegionGuess({
           transition={{ delay: 0.5 }}
           className="text-center"
         >
-          <div className={`p-6 rounded-lg border ${
-            gameStatus === 'won'
-              ? 'bg-green-500/20 border-green-500/40'
-              : 'bg-red-500/20 border-red-500/40'
-          }`}>
-            <h3 className={`text-2xl font-bold mb-2 ${
-              gameStatus === 'won' ? 'text-green-200' : 'text-red-200'
+          <div className={`p-6 rounded-lg border ${gameStatus === 'won'
+            ? 'bg-green-500/20 border-green-500/40'
+            : 'bg-red-500/20 border-red-500/40'
             }`}>
-              {gameStatus === 'won' 
+            <h3 className={`text-2xl font-bold mb-2 ${gameStatus === 'won' ? 'text-green-200' : 'text-red-200'
+              }`}>
+              {gameStatus === 'won'
                 ? (language === 'fr' ? 'Félicitations !' : 'Congratulations!')
                 : t.gameOver
               }
             </h3>
             <p className="text-white/80 mb-4">
-              {t.theRegionWas} <strong>{mysteryRegion.name}</strong>
+              {t.theRegionWas} <strong>{mysteryRegionName}</strong>
             </p>
             {mysteryRegion.description && (
               <p className="text-white/60 text-sm mb-4 italic">

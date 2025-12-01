@@ -17,6 +17,10 @@ import { useGame } from './hooks/useGame';
 import type { PokemonIndexEntry } from './data/pokemonIndex';
 import { FusionGuess } from './components/FusionGuess';
 
+import { pokemonIndex } from './data/pokemonIndex';
+
+// Use full pokemonIndex
+const availablePokemon = pokemonIndex;
 
 function App() {
   // New state for showing credits modal
@@ -31,16 +35,17 @@ function App() {
       return next;
     });
   }
-  const { 
-    mysteryPokemon, 
+  const {
+    mysteryPokemon,
     mysteryRegion,
-    guesses, 
+    guesses,
     regionGuesses,
-    gameStatus, 
-    attemptsLeft, 
-    isLoading, 
-    makeGuess, 
+    gameStatus,
+    attemptsLeft,
+    isLoading,
+    makeGuess,
     makeRegionGuess,
+    decrementAttempts,
     restartGame,
     gameMode,
     changeGameMode,
@@ -92,20 +97,20 @@ function App() {
 
   return (
     <div className="min-h-screen relative bg-gradient-to-br from-gray-950 via-slate-900 to-gray-900">
-      
+
       {/* Background Effects */}
       <BackgroundAnimations />
 
-      <div className="relative z-10 container mx-auto px-4 py-8">
+      <div className="relative z-10 container mx-auto px-4 py-4 md:py-8">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8 }}
           className="max-w-6xl mx-auto"
         >
-          <GameHeader 
-            attemptsLeft={attemptsLeft} 
-            gameStatus={gameStatus} 
+          <GameHeader
+            attemptsLeft={attemptsLeft}
+            gameStatus={gameStatus}
             onInfoClick={handleToggleCredits}
             language={language}
             onLanguageChange={(lang: string) => setLanguage(lang as 'en' | 'fr')}
@@ -143,7 +148,7 @@ function App() {
                 className="w-8 h-8 border-2 border-white/20 border-t-white/60 rounded-full mx-auto mb-4"
               />
               <span className="text-white/60">
-                {gameMode === 'region' ? 
+                {gameMode === 'region' ?
                   (language === 'fr' ? 'Chargement de la région...' : 'Loading region...') :
                   t.loading
                 }
@@ -159,12 +164,11 @@ function App() {
                 language={language}
                 disabled={gameStatus === 'playing' && (guesses.length > 0 || hints.length > 0 || regionGuesses.length > 0)}
               />
-              
+
               {gameMode === 'region' && mysteryRegion && (
                 <RegionGuess
                   t={t}
                   language={language}
-                  attemptsLeft={attemptsLeft}
                   onGuess={makeRegionGuess}
                   mysteryRegion={mysteryRegion}
                   gameStatus={gameStatus}
@@ -179,12 +183,13 @@ function App() {
                   language={language}
                   attemptsLeft={attemptsLeft}
                   restartGame={restartGame}
+                  onGuess={decrementAttempts}
                 />
               )}
 
               {gameMode === 'silhouette' && mysteryPokemon && (
                 <>
-                  <SilhouetteDisplay 
+                  <SilhouetteDisplay
                     pokemon={mysteryPokemon}
                     revealed={gameStatus === 'won' || gameStatus === 'lost'}
                   />
@@ -197,16 +202,17 @@ function App() {
               {/* Only show PokemonSearch for non-fusion and non-region modes */}
               {gameMode !== 'fusion' && gameMode !== 'region' && (
                 <div className="mb-8">
-                  <PokemonSearch 
+                  <PokemonSearch
                     onPokemonSelect={handlePokemonSelect}
                     disabled={gameStatus !== 'playing' || isLoading}
                     placeholder={
                       gameStatus !== 'playing' ? t.searchPlaceholderOver :
-                      isLoading ? t.searchPlaceholderLoading :
-                      t.searchPlaceholder
+                        isLoading ? t.searchPlaceholderLoading :
+                          t.searchPlaceholder
                     }
                     guessed={guesses.map(g => g.pokemon.id)}
                     language={language}
+                    pokemonList={availablePokemon}
                   />
                 </div>
               )}
@@ -231,8 +237,8 @@ function App() {
                             const isCorrect = guess.pokemon.id === mysteryPokemon?.id;
                             return (
                               <div key={guess.pokemon.id} className="flex items-center gap-2 bg-white/10 rounded-lg p-2 relative">
-                                <img 
-                                  src={guess.pokemon.sprite} 
+                                <img
+                                  src={guess.pokemon.sprite}
                                   alt={guess.pokemon.name}
                                   className="w-8 h-8"
                                 />
@@ -271,7 +277,7 @@ function App() {
 
               {/* Only show GameResult for non-region modes */}
               {gameMode !== 'region' && (
-                <GameResult 
+                <GameResult
                   gameStatus={gameStatus}
                   mysteryPokemon={mysteryPokemon!}
                   attemptsUsed={(gameMode === 'silhouette' ? 4 : 8) - attemptsLeft}
@@ -280,7 +286,7 @@ function App() {
                 />
               )}
 
-              
+
             </>
           )}
         </motion.div>
@@ -290,7 +296,7 @@ function App() {
       <div className="fixed top-10 left-10 w-20 h-20 bg-blue-500/3 rounded-full blur-2xl"></div>
       <div className="fixed bottom-20 right-20 w-32 h-32 bg-purple-500/3 rounded-full blur-2xl"></div>
       <div className="fixed top-1/2 right-10 w-16 h-16 bg-pink-500/3 rounded-full blur-2xl"></div>
-      
+
       {/* Mouse following Pokemon (desktop only) */}
       {/* Hide on mobile using a media query check */}
       {typeof window === 'undefined' || window.matchMedia('(pointer: fine)').matches ? <MouseFollowPokemon /> : null}

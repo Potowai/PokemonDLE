@@ -1,61 +1,91 @@
 import { useState, useEffect } from 'react';
 import { getRandomFusionIds } from '../utils/randomPokemon';
 import { isFusionGuessCorrect } from '../utils/fusion';
+import { getMockPokemonDetails } from '../services/mockPokemonData';
+import type { PokemonDetails } from '../types/pokemon';
 
 export type FusionGameStatus = 'playing' | 'won' | 'lost';
-export type FusionGuess = { id: number; name: string };
-export type FusionGuessPair = [FusionGuess | null, FusionGuess | null];
+export type FusionGuessInput = { id: number; name: string; sprite?: string };
+export type FusionGuessResult = PokemonDetails;
+export type FusionGuessPair = [FusionGuessResult | null, FusionGuessResult | null];
 
 export interface UseFusionGameReturn {
   fusionIds: [number, number];
-  guesses: FusionGuessPair;
+  guesses: [FusionGuessInput | null, FusionGuessInput | null];
   status: FusionGameStatus;
   showAnswer: boolean;
   guessHistory: FusionGuessPair[];
-  setGuess: (index: 0 | 1, pokemon: FusionGuess) => void;
-  submitGuess: () => void;
+  setGuess: (index: 0 | 1, pokemon: FusionGuessInput) => void;
+  submitGuess: () => Promise<void>;
   restart: () => void;
+  isLoading: boolean;
+  attempts: number;
 }
 
-export const useFusionGame = (attemptsLeft: number, onRestart: () => void): UseFusionGameReturn => {
+export const useFusionGame = (initialAttempts: number, onRestart: () => void, onGuess?: () => void): UseFusionGameReturn => {
   const [fusionIds, setFusionIds] = useState<[number, number]>(() => getRandomFusionIds());
-  const [guesses, setGuesses] = useState<FusionGuessPair>([null, null]);
+  const [guesses, setGuesses] = useState<[FusionGuessInput | null, FusionGuessInput | null]>([null, null]);
   const [status, setStatus] = useState<FusionGameStatus>('playing');
   const [showAnswer, setShowAnswer] = useState(false);
   const [guessHistory, setGuessHistory] = useState<FusionGuessPair[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [attempts, setAttempts] = useState(initialAttempts);
 
   // Update answer visibility when game ends
   useEffect(() => {
     if (status === 'won' || status === 'lost') {
       setShowAnswer(true);
     }
-    
+
     // Log the correct fusion answer to the console for debugging
     console.log(`Fusion answer: ids = ${fusionIds[0]}, ${fusionIds[1]}`);
   }, [fusionIds, status]);
 
-  const setGuess = (index: 0 | 1, pokemon: FusionGuess) => {
+  const setGuess = (index: 0 | 1, pokemon: FusionGuessInput) => {
     setGuesses(prev => {
-      const newGuesses = [...prev] as FusionGuessPair;
+      const newGuesses = [...prev] as [FusionGuessInput | null, FusionGuessInput | null];
       newGuesses[index] = pokemon;
       return newGuesses;
     });
   };
 
-  const submitGuess = () => {
+  const submitGuess = async () => {
     if (status !== 'playing' || !guesses[0] || !guesses[1]) return;
 
-    // Add to history
-    setGuessHistory(prev => [...prev, guesses]);
+    try {
+      setIsLoading(true);
+      // Fetch full details for both guesses
+      const [p1, p2] = await Promise.all([
+        getMockPokemonDetails(guesses[0].name),
+        getMockPokemonDetails(guesses[1].name)
+      ]);
 
-    const guessIds: [number, number] = [guesses[0].id, guesses[1].id];
-    
-    if (isFusionGuessCorrect(guessIds, fusionIds)) {
-      setStatus('won');
-    } else if (attemptsLeft <= 1) {
-      setStatus('lost');
+      const fullGuesses: FusionGuessPair = [p1, p2];
+
+      // Add to history
+      setGuessHistory(prev => [...prev, fullGuesses]);
+
+      const guessIds: [number, number] = [guesses[0].id, guesses[1].id];
+
+      const isCorrect = isFusionGuessCorrect(guessIds, fusionIds);
+      const newAttempts = attempts - 1;
+      setAttempts(newAttempts);
+
+      // Call parent onGuess if provided
+      if (onGuess) {
+        onGuess();
+      }
+
+      if (isCorrect) {
+        setStatus('won');
+      } else if (newAttempts <= 0) {
+        setStatus('lost');
+      }
+    } catch (error) {
+      console.error('Failed to submit fusion guess:', error);
+    } finally {
+      setIsLoading(false);
     }
-    // Note: attemptsLeft is managed by parent component
   };
 
   const restart = () => {
@@ -64,6 +94,7 @@ export const useFusionGame = (attemptsLeft: number, onRestart: () => void): UseF
     setStatus('playing');
     setShowAnswer(false);
     setGuessHistory([]);
+    setAttempts(initialAttempts);
     onRestart();
   };
 
@@ -76,5 +107,7 @@ export const useFusionGame = (attemptsLeft: number, onRestart: () => void): UseF
     setGuess,
     submitGuess,
     restart,
+    isLoading,
+    attempts,
   };
 };

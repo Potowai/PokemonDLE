@@ -54,7 +54,7 @@ export function MouseFollowPokemon() {
       if (CONFIG.smooth && imgRef.current) {
         positionRef.current.x = lerp(positionRef.current.x, targetRef.current.x, CONFIG.lerpFactor);
         positionRef.current.y = lerp(positionRef.current.y, targetRef.current.y, CONFIG.lerpFactor);
-        
+
         imgRef.current.style.left = positionRef.current.x + 'px';
         imgRef.current.style.top = positionRef.current.y + 'px';
       }
@@ -98,10 +98,10 @@ export function MouseFollowPokemon() {
         height: '100px',
         pointerEvents: 'none',
         userSelect: 'none',
-        zIndex: 9999,
+        zIndex: 50,
         transform: 'translate(-50%, calc(-50% + 24px))',
         willChange: 'left, top',
-        opacity: 0.95,
+        opacity: 0.8,
         filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.25))',
         animation: 'float 2.2s ease-in-out infinite',
         transition: 'filter 0.2s',

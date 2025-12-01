@@ -1,8 +1,9 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import { pokemonIndex } from '../data/pokemonIndex';
 import { getMockPokemonDetails } from '../services/mockPokemonData';
-import { regionsData, getRandomRegion } from '../data/regionData';
-import { MAX_ATTEMPTS, MAX_SILHOUETTE_ATTEMPTS, MAX_REGION_ATTEMPTS } from '../constants/gameConstants';
+import { getRandomRegion } from '../data/regionData';
+import { MAX_ATTEMPTS, MAX_SILHOUETTE_ATTEMPTS, MAX_REGION_ATTEMPTS, MAX_FUSION_ATTEMPTS } from '../constants/gameConstants';
 import type { PokemonDetails, GuessResult, GameStatus, GameMode, SilhouetteHint, Region } from '../types/pokemon';
 
 export function useGame(mode: GameMode = 'classic') {
@@ -12,19 +13,26 @@ export function useGame(mode: GameMode = 'classic') {
   const [regionGuesses, setRegionGuesses] = useState<{ region: string; correct: boolean }[]>([]);
   const [gameStatus, setGameStatus] = useState<GameStatus>('playing');
   const [attemptsLeft, setAttemptsLeft] = useState(
-    mode === 'silhouette' ? MAX_SILHOUETTE_ATTEMPTS : 
-    mode === 'region' ? MAX_REGION_ATTEMPTS : 
-    MAX_ATTEMPTS
+    mode === 'silhouette' ? MAX_SILHOUETTE_ATTEMPTS :
+      mode === 'region' ? MAX_REGION_ATTEMPTS :
+        mode === 'fusion' ? MAX_FUSION_ATTEMPTS :
+          MAX_ATTEMPTS
   );
   const [isLoading, setIsLoading] = useState(false);
   const [hints, setHints] = useState<SilhouetteHint[]>([]);
   const [gameMode, setGameMode] = useState<GameMode>(mode);
 
-  const selectMysteryPokemon = useCallback(async () => {
+  const selectMysteryPokemon = useCallback(async (retryCount = 0) => {
     if (gameMode === 'region') {
       // For region mode, select a random region instead
       const selectedRegion = getRandomRegion();
       setMysteryRegion(selectedRegion);
+      return;
+    }
+
+    if (retryCount > 5) {
+      console.error('Failed to select mystery Pokemon after 5 retries');
+      setIsLoading(false);
       return;
     }
 
@@ -35,6 +43,7 @@ export function useGame(mode: GameMode = 'classic') {
       selectedPokemon = pokemonIndex.find(p => String(p.id) === String(forceId));
     }
     if (!selectedPokemon) {
+      // Select a random Pokemon from the full index
       const randomIndex = Math.floor(Math.random() * pokemonIndex.length);
       selectedPokemon = pokemonIndex[randomIndex];
     }
@@ -46,7 +55,7 @@ export function useGame(mode: GameMode = 'classic') {
     } catch (error) {
       console.error('Failed to load mystery Pokemon:', error);
       // Retry with a different Pokemon
-      selectMysteryPokemon();
+      selectMysteryPokemon(retryCount + 1);
     } finally {
       setIsLoading(false);
     }
@@ -55,33 +64,33 @@ export function useGame(mode: GameMode = 'classic') {
   const generateHint = useCallback((pokemon: PokemonDetails, hintIndex: number): SilhouetteHint | null => {
     const hintTypes = ['type', 'generation', 'color', 'habitat'] as const;
     const hintType = hintTypes[hintIndex];
-    
+
     if (!hintType) return null;
-    
+
     switch (hintType) {
       case 'type':
         return {
           type: 'type',
           value: pokemon.types.join(', '),
-          label: `Type: ${pokemon.types.join('/')}`
+          label: `Type: ${pokemon.types.join('/')} `
         };
       case 'generation':
         return {
           type: 'generation',
-          value: `Gen ${pokemon.generation}`,
-          label: `Generation: ${pokemon.generation}`
+          value: `Gen ${pokemon.generation} `,
+          label: `Generation: ${pokemon.generation} `
         };
       case 'color':
         return {
           type: 'color',
           value: pokemon.color,
-          label: `Color: ${pokemon.color}`
+          label: `Color: ${pokemon.color} `
         };
       case 'habitat':
         return {
           type: 'habitat',
           value: pokemon.habitat || 'Unknown',
-          label: `Habitat: ${pokemon.habitat || 'Unknown'}`
+          label: `Habitat: ${pokemon.habitat || 'Unknown'} `
         };
       default:
         return null;
@@ -92,18 +101,18 @@ export function useGame(mode: GameMode = 'classic') {
     return {
       generation: guess.generation === mystery.generation ? 'correct' : 'incorrect',
       type1: guess.types[0] === mystery.types[0] ? 'correct' : 'incorrect',
-      type2: 
+      type2:
         (!guess.types[1] && !mystery.types[1]) ? 'correct' :
-        (!guess.types[1] || !mystery.types[1]) ? 'missing' :
-        (guess.types[1] === mystery.types[1] || guess.types[1] === mystery.types[0] || guess.types[0] === mystery.types[1]) ? 'correct' : 'incorrect',
+          (!guess.types[1] || !mystery.types[1]) ? 'missing' :
+            (guess.types[1] === mystery.types[1] || guess.types[1] === mystery.types[0] || guess.types[0] === mystery.types[1]) ? 'correct' : 'incorrect',
       color: guess.color === mystery.color ? 'correct' : 'incorrect',
       habitat: guess.habitat === mystery.habitat ? 'correct' : 'incorrect',
-      height: 
+      height:
         guess.height === mystery.height ? 'correct' :
-        guess.height > mystery.height ? 'higher' : 'lower',
-      weight: 
+          guess.height > mystery.height ? 'higher' : 'lower',
+      weight:
         guess.weight === mystery.weight ? 'correct' :
-        guess.weight > mystery.weight ? 'heavier' : 'lighter',
+          guess.weight > mystery.weight ? 'heavier' : 'lighter',
       evolutionStage: guess.evolutionStage === mystery.evolutionStage ? 'correct' : 'incorrect',
     } as const;
   }, []);
@@ -115,18 +124,18 @@ export function useGame(mode: GameMode = 'classic') {
       setIsLoading(true);
       // Force use of mock data for demo
       const guessDetails = await getMockPokemonDetails(pokemonName);
-      
+
       if (guesses.some(g => g.pokemon.id === guessDetails.id)) {
         // Already guessed this Pokemon
         return;
       }
 
       const newAttemptsLeft = attemptsLeft - 1;
-      
+
       // Check win condition first
       if (guessDetails.id === mysteryPokemon.id) {
         setGameStatus('won');
-        setGuesses(prev => [{pokemon: guessDetails, comparison: compareTraits(guessDetails, mysteryPokemon)}, ...prev]);
+        setGuesses(prev => [{ pokemon: guessDetails, comparison: compareTraits(guessDetails, mysteryPokemon) }, ...prev]);
         setAttemptsLeft(newAttemptsLeft);
         return;
       }
@@ -147,7 +156,7 @@ export function useGame(mode: GameMode = 'classic') {
         setGuesses(prev => [result, ...prev]);
       } else {
         // For silhouette mode, just add the guess without comparison
-        setGuesses(prev => [{pokemon: guessDetails, comparison: compareTraits(guessDetails, mysteryPokemon)}, ...prev]);
+        setGuesses(prev => [{ pokemon: guessDetails, comparison: compareTraits(guessDetails, mysteryPokemon) }, ...prev]);
       }
 
       setAttemptsLeft(newAttemptsLeft);
@@ -166,7 +175,11 @@ export function useGame(mode: GameMode = 'classic') {
   const makeRegionGuess = useCallback((regionName: string): boolean => {
     if (!mysteryRegion || gameStatus !== 'playing') return false;
 
-    const isCorrect = regionName.toLowerCase() === mysteryRegion.name.toLowerCase();
+    const normalizedGuess = regionName.toLowerCase();
+    const isCorrect =
+      normalizedGuess === mysteryRegion.name.toLowerCase() ||
+      normalizedGuess === mysteryRegion.names?.fr.toLowerCase();
+
     const newAttemptsLeft = attemptsLeft - 1;
 
     // Add guess to region guesses
@@ -182,14 +195,28 @@ export function useGame(mode: GameMode = 'classic') {
     return isCorrect;
   }, [mysteryRegion, gameStatus, attemptsLeft]);
 
+  const decrementAttempts = useCallback(() => {
+    if (gameStatus !== 'playing') return;
+    setAttemptsLeft(prev => {
+      const newVal = prev - 1;
+      if (newVal <= 0) setGameStatus('lost');
+      return newVal;
+    });
+  }, [gameStatus]);
+
+  const setWon = useCallback(() => {
+    setGameStatus('won');
+  }, []);
+
   const restartGame = useCallback(() => {
     setGuesses([]);
     setRegionGuesses([]);
     setGameStatus('playing');
     setAttemptsLeft(
-      gameMode === 'silhouette' ? MAX_SILHOUETTE_ATTEMPTS : 
-      gameMode === 'region' ? MAX_REGION_ATTEMPTS :
-      MAX_ATTEMPTS
+      gameMode === 'silhouette' ? MAX_SILHOUETTE_ATTEMPTS :
+        gameMode === 'region' ? MAX_REGION_ATTEMPTS :
+          gameMode === 'fusion' ? MAX_FUSION_ATTEMPTS :
+            MAX_ATTEMPTS
     );
     setMysteryPokemon(null);
     setMysteryRegion(null);
@@ -203,9 +230,10 @@ export function useGame(mode: GameMode = 'classic') {
     setRegionGuesses([]);
     setGameStatus('playing');
     setAttemptsLeft(
-      newMode === 'silhouette' ? MAX_SILHOUETTE_ATTEMPTS : 
-      newMode === 'region' ? MAX_REGION_ATTEMPTS :
-      MAX_ATTEMPTS
+      newMode === 'silhouette' ? MAX_SILHOUETTE_ATTEMPTS :
+        newMode === 'region' ? MAX_REGION_ATTEMPTS :
+          newMode === 'fusion' ? MAX_FUSION_ATTEMPTS :
+            MAX_ATTEMPTS
     );
     setMysteryPokemon(null);
     setMysteryRegion(null);
@@ -228,6 +256,8 @@ export function useGame(mode: GameMode = 'classic') {
     isLoading,
     makeGuess,
     makeRegionGuess,
+    decrementAttempts,
+    setWon,
     restartGame,
     gameMode,
     changeGameMode,

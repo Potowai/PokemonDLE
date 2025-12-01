@@ -42,6 +42,12 @@ export interface Translation {
   correctRegion: string;
   wrongRegion: string;
   theRegionWas: string;
+  fusionPrompt: string;
+  fusionGuess1: string;
+  fusionGuess2: string;
+  fusionSubmit: string;
+  fusionWin: string;
+  fusionLose: string;
 }
 
 export const translations: Record<'en' | 'fr', Translation> = {
@@ -89,6 +95,12 @@ export const translations: Record<'en' | 'fr', Translation> = {
     correctRegion: 'Correct! This is',
     wrongRegion: 'Wrong! Try again.',
     theRegionWas: 'The region was:',
+    fusionPrompt: 'Guess the Pokémon Fusion!',
+    fusionGuess1: 'First Pokémon',
+    fusionGuess2: 'Second Pokémon',
+    fusionSubmit: 'Guess',
+    fusionWin: 'Correct! You found both Pokémon!',
+    fusionLose: 'You lose! The fusion was:',
   },
   fr: {
     guessPrompt: 'Devinez le Pokémon mystère de la Gén 1-5 !',
@@ -134,6 +146,12 @@ export const translations: Record<'en' | 'fr', Translation> = {
     correctRegion: 'Correct ! C\'est',
     wrongRegion: 'Faux ! Réessayez.',
     theRegionWas: 'La région était :',
+    fusionPrompt: 'Devinez la Fusion Pokémon !',
+    fusionGuess1: 'Premier Pokémon',
+    fusionGuess2: 'Deuxième Pokémon',
+    fusionSubmit: 'Deviner',
+    fusionWin: 'Correct ! Vous avez trouvé les deux Pokémon !',
+    fusionLose: 'Perdu ! La fusion était :',
   }
 };
 

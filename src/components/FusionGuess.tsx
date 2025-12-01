@@ -1,3 +1,4 @@
+import React from 'react';
 import PokemonSearch from './PokemonSearch';
 import { pokemonNamesFrGen1 } from '../data/pokemonNames.fr.gen1';
 import { pokemonIndexGen1 } from '../data/pokemonIndex.gen1';
@@ -10,11 +11,12 @@ interface FusionGuessProps {
   language: 'en' | 'fr';
   attemptsLeft: number;
   restartGame: () => void;
+  onGuess?: () => void;
 }
 
-export function FusionGuess({ t, language, attemptsLeft, restartGame }: FusionGuessProps) {
-  const fusionGame = useFusionGame(attemptsLeft, restartGame);
-  const { fusionIds, guesses, status, showAnswer, guessHistory, setGuess, submitGuess, restart } = fusionGame;
+export function FusionGuess({ t, language, attemptsLeft, restartGame, onGuess }: FusionGuessProps) {
+  const fusionGame = useFusionGame(attemptsLeft, restartGame, onGuess);
+  const { fusionIds, guesses, status, showAnswer, guessHistory, setGuess, submitGuess, restart, isLoading, attempts } = fusionGame;
 
   const fusionImgUrl = getFusionImageUrl(fusionIds[0], fusionIds[1]);
   const answerNamesEn = [
@@ -36,9 +38,9 @@ export function FusionGuess({ t, language, attemptsLeft, restartGame }: FusionGu
     <div className="max-w-md mx-auto text-center py-8">
       <h2 className="text-2xl font-bold mb-4 text-white">{t.fusionPrompt || 'Guess the Pokémon Fusion!'}</h2>
       <img src={fusionImgUrl} alt="Pokémon Fusion" className="mx-auto mb-6 w-48 h-48 bg-white/10 rounded-xl border border-white/20" />
-      <form onSubmit={handleGuessSubmit} className="flex flex-col gap-6 items-center mb-4">
-        <div className="flex gap-6 justify-center">
-          <div className="relative w-48">
+      <form onSubmit={handleGuessSubmit} className="flex flex-col gap-6 items-center mb-4 w-full">
+        <div className="flex flex-col md:flex-row gap-6 justify-center w-full max-w-2xl">
+          <div className="relative w-full md:w-64">
             <PokemonSearch
               onPokemonSelect={p => handleSelect(0, p)}
               disabled={status !== 'playing'}
@@ -49,8 +51,9 @@ export function FusionGuess({ t, language, attemptsLeft, restartGame }: FusionGu
               pokemonList={pokemonIndexGen1}
             />
             {guesses[0] && (
-              <div className="flex flex-col items-center mt-2">
-                <img src={pokemonIndexGen1.find(p => p.id === guesses[0]?.id)?.sprite} alt={guesses[0]?.name} className="w-12 h-12" />
+              <div className="flex flex-col items-center mt-2 text-white">
+                <img src={guesses[0]?.sprite || pokemonIndexGen1.find(p => p.id === guesses[0]?.id)?.sprite} alt={guesses[0]?.name} className="w-12 h-12" />
+                <span>{guesses[0]?.name}</span>
               </div>
             )}
             {guesses[0] && status !== 'playing' && !isPokemonInFusion(guesses[0].id, fusionIds) && (
@@ -62,7 +65,7 @@ export function FusionGuess({ t, language, attemptsLeft, restartGame }: FusionGu
               </span>
             )}
           </div>
-          <div className="relative w-48">
+          <div className="relative w-full md:w-64">
             <PokemonSearch
               onPokemonSelect={p => handleSelect(1, p)}
               disabled={status !== 'playing'}
@@ -73,8 +76,9 @@ export function FusionGuess({ t, language, attemptsLeft, restartGame }: FusionGu
               pokemonList={pokemonIndexGen1.filter(p => guesses[0] ? p.id !== guesses[0].id : true)}
             />
             {guesses[1] && (
-              <div className="flex flex-col items-center mt-2">
-                <img src={pokemonIndexGen1.find(p => p.id === guesses[1]?.id)?.sprite} alt={guesses[1]?.name} className="w-12 h-12" />
+              <div className="flex flex-col items-center mt-2 text-white">
+                <img src={guesses[1]?.sprite || pokemonIndexGen1.find(p => p.id === guesses[1]?.id)?.sprite} alt={guesses[1]?.name} className="w-12 h-12" />
+                <span>{guesses[1]?.name}</span>
               </div>
             )}
             {guesses[1] && status !== 'playing' && !isPokemonInFusion(guesses[1].id, fusionIds) && (
@@ -90,32 +94,62 @@ export function FusionGuess({ t, language, attemptsLeft, restartGame }: FusionGu
         <button
           type="submit"
           className="mt-2 px-6 py-2 rounded-lg bg-blue-500 text-white font-bold shadow hover:bg-blue-600 transition"
-          disabled={status !== 'playing' || attemptsLeft <= 0}
-        >{t.fusionSubmit || 'Guess'}</button>
+          disabled={status !== 'playing' || attempts <= 0 || isLoading}
+        >{isLoading ? 'Checking...' : (t.fusionSubmit || 'Guess')}</button>
       </form>
       {/* Guess history below inputs */}
       {guessHistory.length > 0 && (
-        <div className="flex flex-col gap-2 items-center mt-4">
-          {guessHistory.map((pair, i) => (
-            <div key={i} className="flex gap-4 items-center">
-              <div className="flex items-center gap-2">
-                {pair[0] && (
-                  <span className="px-2 py-1 rounded bg-white/10 text-white text-sm font-medium border border-white/20">
-                    {pair[0].name}
-                  </span>
-                )}
+        <div className="flex flex-col gap-4 items-center mt-8 w-full max-w-2xl">
+          <h3 className="text-xl font-bold text-white mb-2">Guess History</h3>
+          {guessHistory.slice().reverse().map((pair, i) => (
+            <div key={i} className="flex flex-col md:flex-row gap-4 items-center bg-white/5 p-4 rounded-xl border border-white/10 w-full">
+              <div className="flex-1 flex items-center justify-between gap-4 bg-black/20 p-3 rounded-lg w-full relative overflow-hidden">
+                {pair[0] ? (
+                  <>
+                    <div className="flex items-center gap-3 z-10">
+                      <img src={pair[0].sprite} alt={pair[0].name} className="w-12 h-12" />
+                      <div className="text-left">
+                        <div className="font-bold text-white capitalize">{pair[0].name}</div>
+                        <div className="flex flex-wrap gap-1 mt-0.5 items-center">
+                          <span className="text-xs text-white/60 mr-1">Gen {pair[0].generation}</span>
+                          {pair[0].types.map(t => (
+                            <span key={t} className={`px-1.5 py-0.5 text-[10px] rounded capitalize bg-white/10 text-white/80 border border-white/10`}>
+                              {t}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                ) : <span>-</span>}
                 {pair[0] && !isPokemonInFusion(pair[0].id, fusionIds) && (
-                  <span className="text-red-500 text-xl font-bold">✗</span>
+                  <span className="text-red-500 text-xl font-bold z-10">✗</span>
                 )}
               </div>
-              <div className="flex items-center gap-2">
-                {pair[1] && (
-                  <span className="px-2 py-1 rounded bg-white/10 text-white text-sm font-medium border border-white/20">
-                    {pair[1].name}
-                  </span>
-                )}
+
+              <div className="text-white/40 font-bold">VS</div>
+
+              <div className="flex-1 flex items-center justify-between gap-4 bg-black/20 p-3 rounded-lg w-full relative overflow-hidden">
+                {pair[1] ? (
+                  <>
+                    <div className="flex items-center gap-3 z-10">
+                      <img src={pair[1].sprite} alt={pair[1].name} className="w-12 h-12" />
+                      <div className="text-left">
+                        <div className="font-bold text-white capitalize">{pair[1].name}</div>
+                        <div className="flex flex-wrap gap-1 mt-0.5 items-center">
+                          <span className="text-xs text-white/60 mr-1">Gen {pair[1].generation}</span>
+                          {pair[1].types.map(t => (
+                            <span key={t} className={`px-1.5 py-0.5 text-[10px] rounded capitalize bg-white/10 text-white/80 border border-white/10`}>
+                              {t}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                ) : <span>-</span>}
                 {pair[1] && !isPokemonInFusion(pair[1].id, fusionIds) && (
-                  <span className="text-red-500 text-xl font-bold">✗</span>
+                  <span className="text-red-500 text-xl font-bold z-10">✗</span>
                 )}
               </div>
             </div>
@@ -125,7 +159,7 @@ export function FusionGuess({ t, language, attemptsLeft, restartGame }: FusionGu
       <div className="mb-4 text-white/80">
         {status === 'playing' && (
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full">
-            <span className="font-semibold text-white">{t.attemptsLeft ? t.attemptsLeft(attemptsLeft) : `${attemptsLeft} attempts left`}</span>
+            <span className="font-semibold text-white">{t.attemptsLeft ? t.attemptsLeft(attempts) : `${attempts} attempts left`}</span>
           </div>
         )}
         {status === 'won' && <span className="text-green-400 font-bold">{t.fusionWin || 'Correct! You found both Pokémon!'}</span>}

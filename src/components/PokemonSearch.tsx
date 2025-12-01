@@ -211,7 +211,7 @@ function PokemonSearch({
           aria-autocomplete="list"
           aria-controls={listboxId}
           aria-activedescendant={highlighted >= 0 ? `${listboxId}-item-${highlighted}` : undefined}
-          className="pl-10"
+          className="pl-10 text-base md:text-sm"
           disabled={disabled}
         />
       </div>
@@ -225,7 +225,7 @@ function PokemonSearch({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.18 }}
-            className="absolute z-50 w-full mt-2 bg-black/80 backdrop-blur-md border border-white/20 rounded-lg shadow-2xl overflow-hidden max-h-80 overflow-y-auto"
+            className="absolute z-50 w-full mt-2 bg-black/80 backdrop-blur-md border border-white/20 rounded-lg shadow-2xl overflow-hidden max-h-[40vh] md:max-h-80 overflow-y-auto"
           >
             {results.map((pokemon, index) => {
               const isActive = index === highlighted;
@@ -235,9 +235,8 @@ function PokemonSearch({
                   id={`${listboxId}-item-${index}`}
                   role="option"
                   aria-selected={isActive}
-                  className={`w-full text-left px-4 py-3 flex items-center gap-3 transition-colors cursor-pointer hover:bg-white/10 ${
-                    isActive ? 'bg-white/10' : ''
-                  }`}
+                  className={`w-full text-left px-4 py-3 flex items-center gap-3 transition-colors cursor-pointer hover:bg-white/10 ${isActive ? 'bg-white/10' : ''
+                    }`}
                   onMouseEnter={() => setHighlighted(index)}
                   onMouseDown={(e) => e.preventDefault()} // prevent blur before click
                   onClick={() => select(pokemon)}
